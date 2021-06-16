@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jp.co.amazon2off.mapper.UserMapper">
+
+    <insert id="saveUser">
+        INSERT INTO `user` (user_name, user_mail, pass_word, register_time, `role_id`)
+        VALUES (#{user.userName}, #{user.userMail}, #{user.passWordByMd5}, #{user.registerTime}, #{user.roleId});
+    </insert>
+
+    <select id="selectUserByUserMail" parameterType="String" resultType="jp.co.amazon2off.pojo.UserPojo">
+        SELECT id,
+               user_name AS userName,
+               user_mail AS userMail,
+               pass_word AS passWord,
+               role_id AS roleId,
+               `status`
+        FROM `user`
+        WHERE user_mail = #{userMail};
+    </select>
+
+    <update id="updateUserPaw">
+        UPDATE `user`
+        SET pass_word = #{user.passWordByMd5}
+        WHERE user_mail = #{user.userMail};
+    </update>
+
+</mapper>

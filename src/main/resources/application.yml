@@ -1,0 +1,21 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /amazon2off
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mysqldb?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: Cdx123456
+    type: com.alibaba.druid.pool.DruidDataSource
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: templates/**, static/**
+
+logging:
+  level:
+    jp.co.amazon2off: debug

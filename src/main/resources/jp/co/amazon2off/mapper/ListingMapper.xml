@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="jp.co.amazon2off.mapper.ListingMapper">
+
+    <insert id="addListing" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO listing
+            (asin,
+             title,
+             price,
+             discount_price,
+             discount_percentage,
+             picture_url,
+             small_picture_url,
+             explanation,
+             user_id,
+             category,
+             add_time)
+        VALUES
+            (#{listing.asin},
+            #{listing.title},
+            #{listing.price},
+            #{listing.discountPrice},
+            #{listing.discountPercentage},
+            #{listing.pictureURL},
+            #{listing.smallPictureURL},
+            #{listing.explanation},
+            #{listing.userId},
+            #{listing.category},
+            #{listing.addTime});
+    </insert>
+
+    <select id="getListingList" parameterType="String" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT
+            id,
+            asin,
+            title,
+            discount_price AS discountPrice,
+            small_picture_url AS smallPictureURL
+        FROM
+            listing
+        WHERE
+            `status` = 1
+            <if test="keyWords != null and keyWords != ''">
+                AND (asin LIKE CONCAT('%', #{keyWords}, '%') OR title LIKE CONCAT('%', #{keyWords}, '%'))
+            </if>
+    </select>
+
+    <select id="getListingTopId" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT
+            t1.listing_id AS id
+        FROM
+            ( SELECT listing_id, COUNT( 1 ) count FROM `code` WHERE `status` = 0 GROUP BY listing_id ) t1
+        ORDER BY
+            t1.count DESC
+        LIMIT 4;
+    </select>
+
+    <select id="getListingTopInf" parameterType="String" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT
+            id,
+            asin,
+            title,
+            discount_price AS discountPrice,
+            small_picture_url AS smallPictureURL
+        FROM
+            listing
+        WHERE
+            `status` = 1
+        AND id IN
+        <foreach collection="listingPojo" item="item" index="index" separator="," open="(" close=")">
+            #{item.id}
+        </foreach>
+    </select>
+
+</mapper>
