@@ -3,13 +3,19 @@ package jp.co.amazon2off.service;
 import jp.co.amazon2off.mapper.UserMapper;
 import jp.co.amazon2off.pojo.UserPojo;
 import jp.co.amazon2off.utils.DateUtils;
+import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional(rollbackFor = Exception.class)
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserService {
 
     @Autowired
@@ -54,5 +60,26 @@ public class UserService {
         Md5Hash md5Hash = new Md5Hash(userPojo.getPassWord(), "", 1024);
         userPojo.setPassWordByMd5(md5Hash.toHex());
         userMapper.updateUserPaw(userPojo);
+    }
+
+    /**
+     * 获取用户个人信息
+     *
+     * @return
+     */
+    public UserPojo getUserInfo() throws Exception {
+        return userMapper.getUserInfo(SecurityUtil.getCurrentUser().getId());
+    }
+
+    /**
+     * 个人信息修改
+     *
+     * @param userPojo
+     * @throws Exception
+     */
+    public void updateUserInfo(UserPojo userPojo) throws Exception {
+        userPojo.setId(SecurityUtil.getCurrentUser().getId());
+        userPojo.setUpdateTime(DateUtils.getCurrentTimeMillis());
+        userMapper.updateUserInfo(userPojo);
     }
 }

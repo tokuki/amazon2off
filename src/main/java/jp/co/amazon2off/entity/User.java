@@ -25,6 +25,22 @@ public class User {
      */
     private String passWord;
     /**
+     * 头像
+     */
+    private String avatar;
+    /**
+     * 性别
+     */
+    private String gender;
+    /**
+     * 生日
+     */
+    private Long birthday;
+    /**
+     * 个人介绍
+     */
+    private String intro;
+    /**
      * 注册时间
      */
     private Long registerTime;
@@ -40,6 +56,10 @@ public class User {
      * 用户角色
      */
     private Integer roleId;
+    /**
+     * 更新时间
+     */
+    private Long updateTime;
     /**
      * 状态
      */

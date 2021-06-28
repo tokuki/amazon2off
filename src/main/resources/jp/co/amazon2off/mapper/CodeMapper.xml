@@ -7,11 +7,75 @@
 
     <insert id="addCode">
         INSERT INTO code
-        (code, user_id, listing_id, add_time)
+        (code, listing_id, start_time, end_time, add_time)
         VALUES
-        <foreach collection="codeExcelPojo" item="item" index="index" separator=",">
-            (#{item.code}, #{userId}, #{listingId}, #{addTime})
+        <foreach collection="codeList" item="item" index="index" separator=",">
+            (#{item}, #{listingId}, #{startTime}, #{endTime}, #{addTime})
         </foreach>
     </insert>
+
+    <select id="getListingIdByTime" parameterType="long" resultType="int">
+        SELECT
+            listing_id
+        FROM
+            `code`
+        WHERE
+            start_time > #{systemTime}
+          AND add_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY
+            listing_id,
+            start_time
+        ORDER BY
+            start_time;
+    </select>
+
+    <select id="getListingIdByCode" resultType="int">
+        SELECT
+            t1.listing_id
+        FROM
+            ( SELECT listing_id, COUNT( 1 ) count FROM `code` WHERE `status` = 0 GROUP BY listing_id ) t1
+        ORDER BY
+            t1.count DESC;
+    </select>
+    
+    <update id="updateCode">
+        UPDATE `code`
+        SET user_id = #{codePojo.userId}
+          , receive_time = #{codePojo.receiveTime}
+          , `status` = 0
+        WHERE
+            id = (
+                SELECT
+                    t1.id
+                FROM
+                        (SELECT * FROM `code`) t1
+                WHERE
+                    t1.`status` = 1
+                  AND t1.listing_id = #{codePojo.listingId}
+                  AND #{codePojo.receiveTime} BETWEEN t1.start_time AND t1.end_time
+                ORDER BY t1.id
+                LIMIT 1
+            );
+    </update>
+
+    <select id="codeNumByListingId" resultType="int">
+        SELECT COUNT(1)
+        FROM `code`
+        WHERE user_id = #{codePojo.userId}
+        AND listing_id = #{codePojo.listingId};
+    </select>
+
+    <select id="getTimeByUserId" resultType="jp.co.amazon2off.pojo.CodePojo">
+        SELECT
+            t1.listing_id AS listingId,
+            t1.start_time AS startTime,
+            t1.end_time AS endTime
+        FROM `code` t1
+                 INNER JOIN listing t2 ON t1.listing_id = t2.id
+        WHERE t2.user_id = #{userId}
+          AND t2.`status` = 1
+        GROUP BY t1.listing_id,t1.start_time,t1.end_time
+        ORDER BY t1.start_time;
+    </select>
 
 </mapper>

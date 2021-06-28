@@ -7,72 +7,284 @@
 
     <insert id="addListing" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO listing
-            (asin,
-             title,
-             price,
-             discount_price,
-             discount_percentage,
-             picture_url,
-             small_picture_url,
-             explanation,
-             user_id,
-             category,
-             add_time)
-        VALUES
-            (#{listing.asin},
-            #{listing.title},
-            #{listing.price},
-            #{listing.discountPrice},
-            #{listing.discountPercentage},
-            #{listing.pictureURL},
-            #{listing.smallPictureURL},
-            #{listing.explanation},
-            #{listing.userId},
-            #{listing.category},
-            #{listing.addTime});
+        (asin,
+         title,
+         price,
+         discount_price,
+         discount_percentage,
+         cover_image,
+         small_cover_image,
+         secondary_image_a,
+         small_secondary_image_a,
+         secondary_image_b,
+         small_secondary_image_b,
+         secondary_image_c,
+         small_secondary_image_c,
+         secondary_image_d,
+         small_secondary_image_d,
+         explanation,
+         user_id,
+         category,
+         add_time)
+        VALUES (#{listing.asin},
+                #{listing.title},
+                #{listing.price},
+                #{listing.discountPrice},
+                #{listing.discountPercentage},
+                #{listing.coverImage},
+                #{listing.smallCoverImage},
+                #{listing.secondaryImageA},
+                #{listing.smallSecondaryImageA},
+                #{listing.secondaryImageB},
+                #{listing.smallSecondaryImageB},
+                #{listing.secondaryImageC},
+                #{listing.smallSecondaryImageC},
+                #{listing.secondaryImageD},
+                #{listing.smallSecondaryImageD},
+                #{listing.explanation},
+                #{listing.userId},
+                #{listing.category},
+                #{listing.addTime});
     </insert>
 
-    <select id="getListingList" parameterType="String" resultType="jp.co.amazon2off.pojo.ListingPojo">
+    <select id="getListByKeyWords" parameterType="String" resultType="jp.co.amazon2off.pojo.ListingPojo">
         SELECT
-            id,
-            asin,
-            title,
-            discount_price AS discountPrice,
-            small_picture_url AS smallPictureURL
+        id,
+        asin,
+        title,
+        price,
+        discount_price AS discountPrice,
+        discount_percentage AS discountPercentage,
+        small_cover_image AS smallCoverImage
         FROM
-            listing
+        listing
         WHERE
-            `status` = 1
-            <if test="keyWords != null and keyWords != ''">
-                AND (asin LIKE CONCAT('%', #{keyWords}, '%') OR title LIKE CONCAT('%', #{keyWords}, '%'))
-            </if>
+        `status` = 1
+        <if test="keyWords != null and keyWords != ''">
+            AND (asin LIKE CONCAT('%', #{keyWords}, '%') OR title LIKE CONCAT('%', #{keyWords}, '%'))
+        </if>
     </select>
 
-    <select id="getListingTopId" resultType="jp.co.amazon2off.pojo.ListingPojo">
+    <select id="getListByListingId" parameterType="int" resultType="jp.co.amazon2off.pojo.ListingPojo">
         SELECT
-            t1.listing_id AS id
+        id,
+        asin,
+        title,
+        price,
+        discount_price AS discountPrice,
+        discount_percentage AS discountPercentage,
+        small_cover_image AS smallCoverImage
         FROM
-            ( SELECT listing_id, COUNT( 1 ) count FROM `code` WHERE `status` = 0 GROUP BY listing_id ) t1
-        ORDER BY
-            t1.count DESC
-        LIMIT 4;
-    </select>
-
-    <select id="getListingTopInf" parameterType="String" resultType="jp.co.amazon2off.pojo.ListingPojo">
-        SELECT
-            id,
-            asin,
-            title,
-            discount_price AS discountPrice,
-            small_picture_url AS smallPictureURL
-        FROM
-            listing
+        listing
         WHERE
-            `status` = 1
+        `status` = 1
         AND id IN
-        <foreach collection="listingPojo" item="item" index="index" separator="," open="(" close=")">
-            #{item.id}
+        <foreach collection="listingIds" item="item" index="index" separator="," open="(" close=");">
+            #{item}
         </foreach>
+    </select>
+
+    <select id="getListByDiscount" parameterType="String" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT
+        id,
+        asin,
+        title,
+        price,
+        discount_price AS discountPrice,
+        discount_percentage AS discountPercentage,
+        small_cover_image AS smallCoverImage
+        FROM
+        listing
+        WHERE
+        `status` = 1
+        <if test="listingPojo.type == 1">
+            AND discount_percentage = 100.00;
+        </if>
+        <if test="listingPojo.type == 2">
+            AND discount_percentage &lt; 50.00
+        </if>
+        <if test="listingPojo.type == 3">
+            AND discount_percentage &gt;= 50.00
+            AND discount_percentage &lt; 100.00
+        </if>
+    </select>
+
+    <select id="getListingInfo" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT id,
+               asin,
+               title,
+               price,
+               discount_price      AS discountPrice,
+               discount_percentage AS discountPercentage,
+               explanation,
+               cover_image         AS coverImage,
+               secondary_image_a   AS secondaryImageA,
+               secondary_image_b   AS secondaryImageB,
+               secondary_image_c   AS secondaryImageC,
+               secondary_image_d   AS secondaryImageD
+        FROM listing
+        WHERE `status` = 1
+          AND asin = #{listingPojo.asin}
+          AND id = #{listingPojo.id};
+
+    </select>
+
+    <select id="getListingListByCategory" parameterType="int" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT id,
+               asin,
+               title,
+               price,
+               discount_price      AS discountPrice,
+               discount_percentage AS discountPercentage,
+               small_cover_image   AS smallCoverImage
+        FROM listing
+        WHERE `status` = 1
+          AND category = #{category};
+    </select>
+
+    <select id="getSellerCodeList" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT t1.id,
+               t1.asin,
+               t1.title,
+               t1.price,
+               t1.discount_price      AS discountPrice,
+               t1.discount_percentage AS discountPercentage,
+               t1.small_cover_image   AS smallCoverImage,
+               t2.allNum,
+               t3.receivedNum,
+               t1.add_time            AS addTime
+        FROM listing t1
+                 INNER JOIN (
+            SELECT t1.listing_id, COUNT(1) allNum
+            FROM `code` t1
+                     INNER JOIN listing t2 ON t1.listing_id = t2.id
+            WHERE t2.user_id = #{userId}
+              AND t2.`status` = 1
+            GROUP BY t1.listing_id
+        ) t2 ON t1.id = t2.listing_id
+                 INNER JOIN (
+            SELECT t1.listing_id, COUNT(1) receivedNum
+            FROM `code` t1
+                     INNER JOIN listing t2 ON t1.listing_id = t2.id
+            WHERE t2.user_id = #{userId}
+              AND t2.`status` = 1
+              AND t1.`status` = 0
+            GROUP BY t1.listing_id
+        ) t3 ON t1.id = t3.listing_id
+        WHERE t1.`status` = 1
+          AND t1.user_id = #{userId}
+        ORDER BY t1.add_time DESC;
+    </select>
+
+    <select id="getBuyerCodeList" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT t1.`code`,
+               t2.id,
+               t2.asin,
+               t2.title,
+               t2.price,
+               t2.discount_price      AS discountPrice,
+               t2.discount_percentage AS discountPercentage,
+               t2.small_cover_image   AS smallCoverImage
+        FROM `code` t1
+                 INNER JOIN listing t2 ON t1.listing_id = t2.id
+        WHERE t1.user_id = #{userId}
+          AND t2.`status` = 1
+    </select>
+
+    <update id="updateListingInfo">
+        UPDATE listing
+        SET
+        <if test="listingPojo.title != null and listingPojo.title != '' ">
+            title = #{listingPojo.title},
+        </if>
+        <if test="listingPojo.price != null and listingPojo.price != '' ">
+            price = #{listingPojo.price},
+        </if>
+        <if test="listingPojo.discountPrice != null and listingPojo.discountPrice != '' ">
+            discount_price = #{listingPojo.discountPrice},
+        </if>
+        <if test="listingPojo.discountPercentage != null and listingPojo.discountPercentage != '' ">
+            discount_percentage = #{listingPojo.discountPercentage},
+        </if>
+        <if test="listingPojo.coverImage != null and listingPojo.coverImage != '' ">
+            cover_image = #{listingPojo.coverImage},
+        </if>
+        <if test="listingPojo.smallCoverImage != null and listingPojo.smallCoverImage != '' ">
+            small_cover_image = #{listingPojo.smallCoverImage},
+        </if>
+        <if test="listingPojo.secondaryImageA != null and listingPojo.secondaryImageA != '' ">
+            secondary_image_a = #{listingPojo.secondaryImageA},
+        </if>
+        <if test="listingPojo.smallSecondaryImageA != null and listingPojo.smallSecondaryImageA != '' ">
+            small_secondary_image_a = #{listingPojo.smallSecondaryImageA},
+        </if>
+        <if test="listingPojo.secondaryImageB != null and listingPojo.secondaryImageB != '' ">
+            secondary_image_b = #{listingPojo.secondaryImageB},
+        </if>
+        <if test="listingPojo.smallSecondaryImageB != null and listingPojo.smallSecondaryImageB != '' ">
+            small_secondary_image_b = #{listingPojo.smallSecondaryImageB},
+        </if>
+        <if test="listingPojo.secondaryImageC != null and listingPojo.secondaryImageC != '' ">
+            secondary_image_c = #{listingPojo.secondaryImageC},
+        </if>
+        <if test="listingPojo.smallSecondaryImageC != null and listingPojo.smallSecondaryImageC != '' ">
+            small_secondary_image_c = #{listingPojo.smallSecondaryImageC},
+        </if>
+        <if test="listingPojo.secondaryImageD != null and listingPojo.secondaryImageD != '' ">
+            secondary_image_d = #{listingPojo.secondaryImageD},
+        </if>
+        <if test="listingPojo.smallSecondaryImageD != null and listingPojo.smallSecondaryImageD != '' ">
+            small_secondary_image_d = #{listingPojo.smallSecondaryImageD},
+        </if>
+        <if test="listingPojo.category != null and listingPojo.category != '' ">
+            category = #{listingPojo.category},
+        </if>
+        update_time = #{listingPojo.updateTime}
+        WHERE
+        `status` = 1
+        AND asin = #{listingPojo.asin}
+        AND id = #{listingPojo.id};
+    </update>
+
+    <select id="getPopularListingByPer" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT id,
+               asin,
+               title,
+               price,
+               discount_price      AS discountPrice,
+               discount_percentage AS discountPercentage,
+               cover_image         AS coverImage
+        FROM listing
+        WHERE `status` = 1
+          AND category = #{listingPojo.category}
+          AND discount_percentage &gt; #{listingPojo.discountPercentage};
+    </select>
+
+    <select id="getPopularListingByCode" resultType="jp.co.amazon2off.pojo.ListingPojo">
+        SELECT
+            t1.id,
+            t1.asin,
+            t1.title,
+            t1.price,
+            t1.discount_price AS discountPrice,
+            t1.discount_percentage AS discountPercentage,
+            t1.cover_image AS coverImage ,t2.reNum
+        FROM listing t1
+        INNER JOIN (
+            SELECT
+                t2.listing_id,
+                COUNT( 1 ) AS reNum
+            FROM
+                `code` t2
+                    INNER JOIN listing t3 ON t2.listing_id = t3.id
+            WHERE t3.`status` = 1
+            AND t2.`status` = 0
+            AND t3.category = #{listingPojo.category}
+            GROUP BY
+                t2.listing_id) t4 ON t4.listing_id = t1.id
+        WHERE t1.`status` = 1
+        AND t1.category = #{listingPojo.category}
+        ORDER BY t2.reNum DESC
     </select>
 
 </mapper>

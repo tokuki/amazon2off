@@ -28,8 +28,10 @@ public class ErrorCodeConstants {
     public static String U_0009 = "U_0009";
     // 密码不一致
     public static String U_0010 = "U_0010";
-    // token认证失败
+    // 个人信息获取失败
     public static String U_0011 = "U_0011";
+    // 个人信息修改失败
+    public static String U_0012 = "U_0012";
 
     /**
      * 商品相关ERROR CODE
@@ -40,11 +42,41 @@ public class ErrorCodeConstants {
     public static String L_0002 = "L_0002";
     // 商品TOP信息获取失败
     public static String L_0003 = "L_0003";
+    // 商品详情查询失败
+    public static String L_0004 = "L_0004";
+    // 商品图片上传失败
+    public static String L_0005 = "L_0005";
+    // 商品图片下载失败
+    public static String l_0006 = "L_0006";
+    // 商品主图片不能为空
+    public static String l_0007 = "L_0007";
+    // 卖家一览获取失败
+    public static String l_0008 = "L_0008";
+    // 普通用户一览获取失败
+    public static String l_0009 = "l_0009";
+    // 商家商品编辑失败
+    public static String l_0010 = "l_0010";
+    // 热门商品推荐获取失败
+    public static String l_0011 = "l_0011";
 
     /**
      * Excel相关ERROR CODE
      */
     // Excel导出失败
     public static String EXC_0001 = "EXC_0001";
+
+    /**
+     * 优惠码相关ERROR CODE
+     */
+    // 领取优惠码失败
+    public static String C_0001 = "C_0001";
+    // 已领取过这个商品优惠码
+    public static String C_0002 = "C_0002";
+    // 优惠码check失败
+    public static String C_0003 = "C_0003";
+    // 优惠码一览获取失败
+    public static String C_0004 = "C_0004";
+    // 优惠码发布失败
+    public static String C_0005 = "C_0005";
 
 }

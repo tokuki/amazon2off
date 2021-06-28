@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import jp.co.amazon2off.constant.ErrorCodeConstants;
 import jp.co.amazon2off.pojo.UserPojo;
+import jp.co.amazon2off.security.realm.UserRealm;
 import jp.co.amazon2off.service.UserService;
 import jp.co.amazon2off.utils.ResponseResult;
 import jp.co.amazon2off.utils.ValidationUtils;
@@ -18,6 +19,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,7 +70,6 @@ public class UserController {
             Subject subject = SecurityUtils.getSubject();
             subject.login(new UsernamePasswordToken(userPojo.getUserMail(), userPojo.getPassWord()));
             if (subject.isAuthenticated()) {
-                System.out.println(subject.getSession().getTimeout());
                 return ResponseResult.success();
             }
         } catch (UnknownAccountException e) {
@@ -94,6 +95,9 @@ public class UserController {
             Subject subject = SecurityUtils.getSubject();
             subject.logout();
             if (!subject.isAuthenticated()) {
+                DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+                UserRealm shiroRealm = (UserRealm) securityManager.getRealms().iterator().next();
+                shiroRealm.clearAllCache();
                 return ResponseResult.success();
             }
         } catch (Exception e) {
@@ -129,4 +133,34 @@ public class UserController {
     public ResponseResult loginState() {
         return ResponseResult.success(SecurityUtils.getSubject().isAuthenticated());
     }
+
+    @ApiOperation(value = "获取用户个人信息")
+    @GetMapping("/getUserInfo")
+    @RequiresPermissions(value = {"seller", "buyer"}, logical = Logical.OR)
+    public ResponseResult<UserPojo> getUserInfo() {
+        try {
+            return ResponseResult.success(userService.getUserInfo());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseResult.error(ErrorCodeConstants.U_0011);
+    }
+
+    @ApiOperation(value = "用户个人信息修改")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "gender", value = "性别", required = false, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "birthday", value = "生日", required = false, paramType = "query", dataType = "long"),
+            @ApiImplicitParam(name = "intro", value = "个人介绍", required = false, paramType = "query", dataType = "String")
+    })
+    @PostMapping("/updateUserInfo")
+    public ResponseResult updateUserInfo(UserPojo userPojo) {
+        try {
+            userService.updateUserInfo(userPojo);
+            return ResponseResult.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseResult.error(ErrorCodeConstants.U_0012);
+    }
+
 }

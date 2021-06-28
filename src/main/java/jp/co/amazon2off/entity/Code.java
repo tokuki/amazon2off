@@ -18,13 +18,21 @@ public class Code {
      */
     private String code;
     /**
-     * 用户ID
+     * 领取优惠码的用户ID
      */
     private Integer userId;
     /**
      * 商品ID
      */
     private Integer listingId;
+    /**
+     * 活动开始时间
+     */
+    private Long startTime;
+    /**
+     * 活动结束时间
+     */
+    private Long endTime;
     /**
      * 添加时间
      */

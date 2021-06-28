@@ -35,6 +35,7 @@ public class UserRealm extends AuthorizingRealm {
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         String role = roleService.getRole(SecurityUtil.getCurrentUser().getRoleId());
         authorizationInfo.addStringPermission(role);
+        log.info("--------------结束授权--------------");
         return authorizationInfo;
     }
 
@@ -56,7 +57,58 @@ public class UserRealm extends AuthorizingRealm {
         if (userPojo.getStatus() == 0) {
             throw new DisabledAccountException();
         }
+        log.info("--------------结束身份认证--------------");
         return new SimpleAuthenticationInfo(userPojo, userPojo.getPassWord(), getName());
+    }
+
+    /**
+     * 重写方法,清除当前用户的的 授权缓存
+     *
+     * @param principal
+     */
+    @Override
+    public void clearCachedAuthorizationInfo(PrincipalCollection principal) {
+        super.clearCachedAuthorizationInfo(principal);
+    }
+
+    /**
+     * 重写方法，清除当前用户的 认证缓存
+     *
+     * @param principal
+     */
+    @Override
+    public void clearCachedAuthenticationInfo(PrincipalCollection principal) {
+        super.clearCachedAuthenticationInfo(principal);
+    }
+
+    /**
+     * 重写方法，清除当前用户的 认证缓存和授权缓存
+     */
+    @Override
+    public void clearCache(PrincipalCollection principals) {
+        super.clearCache(principals);
+    }
+
+    /**
+     * 自定义方法：清除所有用户的 授权缓存
+     */
+    public void clearAllCachedAuthorizationInfo() {
+        getAuthorizationCache().clear();
+    }
+
+    /**
+     * 自定义方法：清除所有用户的 认证缓存
+     */
+    public void clearAllCachedAuthenticationInfo() {
+        getAuthenticationCache().clear();
+    }
+
+    /**
+     * 自定义方法：清除所有用户的  认证缓存  和 授权缓存
+     */
+    public void clearAllCache() {
+        clearAllCachedAuthenticationInfo();
+        clearAllCachedAuthorizationInfo();
     }
 
 }

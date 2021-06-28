@@ -32,4 +32,18 @@ public interface UserMapper {
      * @param userPojo
      */
     void updateUserPaw(@Param("user") UserPojo userPojo);
+
+    /**
+     * 获取用户个人信息
+     *
+     * @return
+     */
+    UserPojo getUserInfo(@Param("userId") Integer userId);
+
+    /**
+     * 修改个人信息
+     *
+     * @param userPojo
+     */
+    void updateUserInfo(@Param("userPojo") UserPojo userPojo);
 }

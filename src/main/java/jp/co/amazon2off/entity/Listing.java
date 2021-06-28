@@ -31,15 +31,47 @@ public class Listing {
     /**
      * 折扣百分比
      */
-    private String discountPercentage;
+    private Double discountPercentage;
     /**
-     * 商品大图片URL
+     * 商品主图大图片
      */
-    private String pictureURL;
+    private String coverImage;
     /**
-     * 商品小图片URL
+     * 商品主图小图片
      */
-    private String smallPictureURL;
+    private String smallCoverImage;
+    /**
+     * 商品副图大图a
+     */
+    private String secondaryImageA;
+    /**
+     * 商品副图小图a
+     */
+    private String smallSecondaryImageA;
+    /**
+     * 商品副图大图b
+     */
+    private String secondaryImageB;
+    /**
+     * 商品副图小图b
+     */
+    private String smallSecondaryImageB;
+    /**
+     * 商品副图大图c
+     */
+    private String secondaryImageC;
+    /**
+     * 商品副图小图c
+     */
+    private String smallSecondaryImageC;
+    /**
+     * 商品副图大图d
+     */
+    private String secondaryImageD;
+    /**
+     * 商品副图小图d
+     */
+    private String smallSecondaryImageD;
     /**
      * 商品说明
      */
@@ -56,6 +88,10 @@ public class Listing {
      * 添加时间
      */
     private Long addTime;
+    /**
+     * 更新时间
+     */
+    private Long updateTime;
     /**
      * 商品状态
      */

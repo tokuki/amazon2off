@@ -9,13 +9,28 @@ spring:
     url: jdbc:mysql://localhost:3306/mysqldb?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
     username: root
     password: Cdx123456
-    type: com.alibaba.druid.pool.DruidDataSource
+  #    type: com.alibaba.druid.pool.DruidDataSource
+#    druid:
+#      default-auto-commit: false
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      url: jdbc:mysql://localhost:3306/mysqldb?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+#      username: root
+#      password: Cdx123456
   devtools:
     restart:
       enabled: true
       additional-paths: src/main/java
       exclude: templates/**, static/**
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  aop:
+    proxy-target-class: true
 
 logging:
   level:
     jp.co.amazon2off: debug
+
+#上传位置
+uploadDir: /Tmp_Image/
