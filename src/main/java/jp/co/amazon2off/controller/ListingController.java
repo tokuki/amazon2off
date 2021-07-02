@@ -86,7 +86,9 @@ public class ListingController {
     @ApiOperation(value = "商品详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "商品id", required = true, paramType = "query", dataType = "int"),
-            @ApiImplicitParam(name = "asin", value = "ASIN", required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "asin", value = "ASIN", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "startTime", value = "活动开始时间", required = true, paramType = "query", dataType = "Long"),
+            @ApiImplicitParam(name = "endTime", value = "活动结束时间", required = true, paramType = "query", dataType = "Long")
     })
     @GetMapping("/getListingInfo")
     public ResponseResult<List<ListingPojo>> getListingInfo(ListingPojo listingPojo) {
@@ -136,13 +138,15 @@ public class ListingController {
 
     @ApiOperation(value = "商家商品编辑")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "商品id", required = false, paramType = "query", dataType = "int"),
-            @ApiImplicitParam(name = "asin", value = "商品Asin", required = false, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "id", value = "商品id", required = true, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "asin", value = "商品Asin", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "title", value = "商品标题", required = false, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "price", value = "商品原价格", required = false, paramType = "query", dataType = "Double"),
-            @ApiImplicitParam(name = "discountPrice", value = "商品折后价格", required = false, paramType = "query", dataType = "Double"),
+            @ApiImplicitParam(name = "discountPrice", value = "商品折后价格(原价改动必传，否则不传)", required = false, paramType = "query", dataType = "Double"),
             @ApiImplicitParam(name = "explanation", value = "商品说明", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "category", value = "商品品类", required = false, paramType = "query", dataType = "int")
+            @ApiImplicitParam(name = "category", value = "商品品类", required = false, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "startTime", value = "活动开始时间", required = true, paramType = "query", dataType = "Long"),
+            @ApiImplicitParam(name = "endTime", value = "活动结束时间", required = true, paramType = "query", dataType = "Long")
     })
     @PostMapping("/updateListingInfo")
     @RequiresPermissions("seller")

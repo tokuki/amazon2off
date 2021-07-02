@@ -18,6 +18,14 @@ public class Code {
      */
     private String code;
     /**
+     * 商品折后价格
+     */
+    private Double discountPrice;
+    /**
+     * 折扣百分比
+     */
+    private Double discountPercentage;
+    /**
      * 领取优惠码的用户ID
      */
     private Integer userId;

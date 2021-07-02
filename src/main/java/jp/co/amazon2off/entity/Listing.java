@@ -25,14 +25,6 @@ public class Listing {
      */
     private Double price;
     /**
-     * 商品折后价格
-     */
-    private Double discountPrice;
-    /**
-     * 折扣百分比
-     */
-    private Double discountPercentage;
-    /**
      * 商品主图大图片
      */
     private String coverImage;

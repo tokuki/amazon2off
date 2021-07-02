@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import jp.co.amazon2off.constant.ErrorCodeConstants;
+import jp.co.amazon2off.pojo.CodePojo;
 import jp.co.amazon2off.service.CodeService;
 import jp.co.amazon2off.utils.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
@@ -64,14 +65,16 @@ public class CodeController {
     @ApiOperation(value = "商家发布优惠码")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "listingId", value = "商品ID", required = true, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "price", value = "商品原价", required = true, paramType = "query", dataType = "Double"),
+            @ApiImplicitParam(name = "discountPrice", value = "商品折后价格", required = true, paramType = "query", dataType = "Double"),
             @ApiImplicitParam(name = "startTime", value = "活动开始时间", required = true, paramType = "query", dataType = "Long"),
             @ApiImplicitParam(name = "endTime", value = "活动结束时间", required = true, paramType = "query", dataType = "Long")
     })
     @PostMapping(value = "/addCode", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @RequiresPermissions("seller")
-    public ResponseResult addCode(Integer listingId, @RequestPart(value = "codeFile") MultipartFile codeFile, Long startTime, Long endTime) {
+    public ResponseResult addCode(@RequestPart(value = "codeFile") MultipartFile codeFile, CodePojo codePojo, Double price) {
         try {
-            codeService.addCode(listingId, codeFile, startTime, endTime);
+            codeService.addCode(codeFile, codePojo, price);
             ResponseResult.success();
         } catch (Exception e) {
             e.printStackTrace();

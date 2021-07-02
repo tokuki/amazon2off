@@ -37,7 +37,6 @@ public class ListingPojo extends Listing implements Serializable {
      * 已被取数量
      */
     private int allNum;
-
     /**
      * 优惠码数量
      */
@@ -50,4 +49,12 @@ public class ListingPojo extends Listing implements Serializable {
      * 活动结束时间
      */
     private Long endTime;
+    /**
+     * 商品折后价格
+     */
+    private Double discountPrice;
+    /**
+     * 折扣百分比
+     */
+    private Double discountPercentage;
 }

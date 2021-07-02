@@ -61,15 +61,17 @@ public class CodeService {
     /**
      * 商家发布优惠码
      *
-     * @param listingId
      * @param codeFile
+     * @param codePojo
+     * @param price
      * @throws Exception
      */
-    public void addCode(Integer listingId, MultipartFile codeFile, Long startTime, Long endTime) throws Exception {
+    public void addCode(MultipartFile codeFile, CodePojo codePojo, Double price) throws Exception {
+        codePojo.setDiscountPercentage(Double.valueOf(String.format("%.2f", codePojo.getDiscountPrice() / price * 100)));
         // 优惠码处理
         List<String> codeList = FileUtils.readFileByInputStream(codeFile.getInputStream());
         // 添加优惠码
-        codeMapper.addCode(codeList, listingId, DateUtils.getCurrentTimeMillis(), startTime, endTime);
+        codeMapper.addCode(codeList, codePojo);
     }
 
 }

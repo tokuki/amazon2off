@@ -1,6 +1,7 @@
 package jp.co.amazon2off.mapper;
 
 import jp.co.amazon2off.pojo.CodePojo;
+import jp.co.amazon2off.pojo.ListingPojo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,16 +18,10 @@ public interface CodeMapper {
      * 添加折扣码
      *
      * @param codeList
-     * @param listingId
-     * @param addTime
-     * @param startTime
-     * @param endTime
+     * @param codePojo
      */
     void addCode(@Param("codeList") List<String> codeList,
-                 @Param("listingId") Integer listingId,
-                 @Param("addTime") Long addTime,
-                 @Param("startTime") Long startTime,
-                 @Param("endTime") Long endTime);
+                 @Param("codePojo") CodePojo codePojo);
 
     /**
      * 获取未开始活动的商品ID
@@ -67,5 +62,20 @@ public interface CodeMapper {
      * @return
      */
     List<CodePojo> getTimeByUserId(@Param("userId") Integer userId);
+
+    /**
+     * 根据商品ID获取活动时间
+     *
+     * @param listingPojo
+     * @return
+     */
+    List<CodePojo> getTimeByListingId(@Param("listingPojo") List<ListingPojo> listingPojo);
+
+    /**
+     * 更新优惠码折扣百分比
+     *
+     * @param listingPojo
+     */
+    void updateCodePercentage(@Param("listingPojo") ListingPojo listingPojo);
 
 }

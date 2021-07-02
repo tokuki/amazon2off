@@ -57,7 +57,8 @@ public class ListingService {
                                           MultipartFile codeFile, Long startTime, Long endTime) throws Exception {
         Map<String, String> map = new HashMap<>();
         // 存储路径
-        String path = System.getProperty("user.home") + uploadDir;
+        String path = System.getProperty("java.io.tmpdir") + uploadDir;
+        log.info(">>>>>>>路径>>>>>>>>>>>>>:"+path);
         // 主图处理
         map.putAll(uploadCoverImage(path, coverImageFile, 3, false));
         // 主图大图片路径
@@ -79,15 +80,22 @@ public class ListingService {
         }
 
         listingPojo.setUserId(SecurityUtil.getCurrentUser().getId());
-        listingPojo.setDiscountPercentage(Double.valueOf(String.format("%.2f", listingPojo.getDiscountPrice() / listingPojo.getPrice() * 100)));
         listingPojo.setAddTime(DateUtils.getCurrentTimeMillis());
         // 优惠码处理
         List<String> codeList = FileUtils.readFileByInputStream(codeFile.getInputStream());
+        // 优惠码相关
+        CodePojo codePojo = new CodePojo();
+        codePojo.setListingId(listingPojo.getId());
+        codePojo.setStartTime(startTime);
+        codePojo.setEndTime(endTime);
+        codePojo.setDiscountPrice(listingPojo.getDiscountPrice());
+        codePojo.setDiscountPercentage(Double.valueOf(String.format("%.2f", listingPojo.getDiscountPrice() / listingPojo.getPrice() * 100)));
+        codePojo.setAddTime(DateUtils.getCurrentTimeMillis());
 
         // 添加商品
         listingMapper.addListing(listingPojo);
         // 添加优惠码
-        codeMapper.addCode(codeList, listingPojo.getId(), DateUtils.getCurrentTimeMillis(), startTime, endTime);
+        codeMapper.addCode(codeList, codePojo);
         return map;
     }
 
@@ -103,7 +111,7 @@ public class ListingService {
         response.addHeader("Content-Type", "application/octet-stream");
         response.addHeader("Content-Disposition", "attachment;filename=" + imageName);
 
-        String fileUrl = System.getProperty("user.home") + uploadDir + "/" + imageName;
+        String fileUrl = System.getProperty("java.io.tmpdir") + uploadDir + "/" + imageName;
         File file;
         InputStream is = null;
         OutputStream out = null;
@@ -130,10 +138,30 @@ public class ListingService {
     public List<ListingPojo> getListingList(ListingPojo listingPojo) throws Exception {
         List<Integer> listingIdList = new ArrayList<>();
         if (listingPojo.getType() == 0) {
-            return listingMapper.getListByKeyWords(listingPojo.getKeyWords());
+            List<ListingPojo> list = listingMapper.getListByKeyWords(listingPojo.getKeyWords());
+            if (list != null && !list.isEmpty()) {
+                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+                if (codePojo != null && !codePojo.isEmpty()) {
+                    return listingInfoFormat(codePojo, list);
+                }
+            }
         }
         if (listingPojo.getType() == 1 || listingPojo.getType() == 2 || listingPojo.getType() == 3) {
-            return listingMapper.getListByDiscount(listingPojo);
+            List<ListingPojo> list = listingMapper.getListByDiscount(listingPojo);
+            if (list != null && !list.isEmpty()) {
+                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+                if (codePojo != null && !codePojo.isEmpty()) {
+                    if (listingPojo.getType() == 1) {
+                        return listingInfoFormat(codePojo, list).stream().filter(i -> i.getDiscountPercentage() == 100.00).collect(Collectors.toList());
+                    }
+                    if (listingPojo.getType() == 2) {
+                        return listingInfoFormat(codePojo, list).stream().filter(i -> i.getDiscountPercentage() < 50.00).collect(Collectors.toList());
+                    }
+                    if (listingPojo.getType() == 3) {
+                        return listingInfoFormat(codePojo, list).stream().filter(i -> i.getDiscountPercentage() >= 50.00 && i.getDiscountPercentage() < 100.00).collect(Collectors.toList());
+                    }
+                }
+            }
         }
         // 近期要开始活动的商品（2天）
         if (listingPojo.getType() == 4) {
@@ -144,7 +172,13 @@ public class ListingService {
             listingIdList = codeMapper.getListingIdByCode();
         }
         if (listingIdList != null && !listingIdList.isEmpty()) {
-            return listingMapper.getListByListingId(listingIdList);
+            List<ListingPojo> list = listingMapper.getListByListingId(listingIdList);
+            if (list != null && !list.isEmpty()) {
+                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+                if (codePojo != null && !codePojo.isEmpty()) {
+                    return listingInfoFormat(codePojo, list);
+                }
+            }
         }
         return new ArrayList<>();
     }
@@ -166,7 +200,14 @@ public class ListingService {
      * @return
      */
     public List<ListingPojo> getListingListByCategory(Integer category) throws Exception {
-        return listingMapper.getListingListByCategory(category);
+        List<ListingPojo> list = listingMapper.getListingListByCategory(category);
+        if (list != null && !list.isEmpty()) {
+            List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+            if (codePojo != null && !codePojo.isEmpty()) {
+                return listingInfoFormat(codePojo, list);
+            }
+        }
+        return list;
     }
 
     /**
@@ -180,28 +221,44 @@ public class ListingService {
         if (list != null && !list.isEmpty()) {
             List<CodePojo> codeList = codeMapper.getTimeByUserId(userId);
             if (codeList != null && !codeList.isEmpty()) {
-                Long nowTime = DateUtils.getCurrentTimeMillis();
-                Map<Integer, List<CodePojo>> listMap = codeList.stream().collect(Collectors.groupingBy(CodePojo::getListingId));
-                for (ListingPojo listingPojo : list) {
-                    Long dValue = null;
-                    for (CodePojo codePojo : listMap.get(listingPojo.getId())) {
-                        Long dis = nowTime - codePojo.getStartTime();
-                        if (dValue == null) {
-                            dValue = dis;
-                            listingPojo.setStartTime(codePojo.getStartTime());
-                            listingPojo.setEndTime(codePojo.getEndTime());
-                            continue;
-                        }
-                        if (Math.min(dis, dValue) == dis) {
-                            dValue = dis;
-                            listingPojo.setStartTime(codePojo.getStartTime());
-                            listingPojo.setEndTime(codePojo.getEndTime());
-                        }
-                    }
-                }
+                return listingInfoFormat(codeList, list);
             }
         }
         return list;
+    }
+
+    /**
+     * 组装商品活动时间
+     *
+     * @param codeList
+     * @param listingList
+     * @return
+     */
+    private List<ListingPojo> listingInfoFormat(List<CodePojo> codeList, List<ListingPojo> listingList) {
+        Long nowTime = DateUtils.getCurrentTimeMillis();
+        Map<Integer, List<CodePojo>> listMap = codeList.stream().collect(Collectors.groupingBy(CodePojo::getListingId));
+        for (ListingPojo listingPojo : listingList) {
+            Long dValue = null;
+            for (CodePojo codePojo : listMap.get(listingPojo.getId())) {
+                Long dis = nowTime - codePojo.getStartTime();
+                if (dValue == null) {
+                    dValue = dis;
+                    listingPojo.setStartTime(codePojo.getStartTime());
+                    listingPojo.setEndTime(codePojo.getEndTime());
+                    listingPojo.setDiscountPrice(codePojo.getDiscountPrice());
+                    listingPojo.setDiscountPercentage(codePojo.getDiscountPercentage());
+                    continue;
+                }
+                if (Math.min(dis, dValue) == dis) {
+                    dValue = dis;
+                    listingPojo.setStartTime(codePojo.getStartTime());
+                    listingPojo.setEndTime(codePojo.getEndTime());
+                    listingPojo.setDiscountPrice(codePojo.getDiscountPrice());
+                    listingPojo.setDiscountPercentage(codePojo.getDiscountPercentage());
+                }
+            }
+        }
+        return listingList;
     }
 
     /**
@@ -226,7 +283,8 @@ public class ListingService {
     public Map<String, String> updateListingInfo(ListingPojo listingPojo, MultipartFile coverImageFile, MultipartFile[] secondaryImageFile) throws Exception {
         Map<String, String> map = new HashMap<>();
         // 存储路径
-        String path = System.getProperty("user.home") + uploadDir;
+        String path = System.getProperty("java.io.tmpdir") + uploadDir;
+        log.info(">>>>>>>路径>>>>>>>>>>>>>:"+path);
         if (coverImageFile != null && !coverImageFile.isEmpty()) {
             // 主图处理
             map.putAll(uploadCoverImage(path, coverImageFile, 3, false));
@@ -251,6 +309,10 @@ public class ListingService {
 
         listingPojo.setUpdateTime(DateUtils.getCurrentTimeMillis());
         listingMapper.updateListingInfo(listingPojo);
+        if (listingPojo.getPrice() != null) {
+            listingPojo.setDiscountPercentage(Double.valueOf(String.format("%.2f", listingPojo.getDiscountPrice() / listingPojo.getPrice() * 100)));
+            codeMapper.updateCodePercentage(listingPojo);
+        }
         return map;
     }
 
@@ -272,6 +334,12 @@ public class ListingService {
             case 1:
                 list = listingMapper.getPopularListingByCode(listingPojo);
                 break;
+        }
+        if (list != null && !list.isEmpty()) {
+            List<CodePojo> codeList = codeMapper.getTimeByListingId(list);
+            if (codeList != null && !codeList.isEmpty()) {
+                return listingInfoFormat(codeList, list);
+            }
         }
         return list;
     }
