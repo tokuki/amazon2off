@@ -45,7 +45,7 @@ public class UserService {
         // 注册时间
         userPojo.setRegisterTime(DateUtils.getCurrentTimeMillis());
         // 用户角色
-        userPojo.setRoleId(3);
+        userPojo.setRoleId(userPojo.getRoleId());
         // 保存用户信息
         userMapper.saveUser(userPojo);
     }

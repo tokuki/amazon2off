@@ -40,7 +40,7 @@ public class UserController {
             @ApiImplicitParam(name = "userName", value = "用户名", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "userMail", value = "用户邮箱", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "passWord", value = "用户密码", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "role", value = "用户角色", required = true, paramType = "query", dataType = "int")
+            @ApiImplicitParam(name = "roleId", value = "用户角色", required = true, paramType = "query", dataType = "int")
     })
     @PostMapping("/register")
     public ResponseResult register(UserPojo userPojo) {
