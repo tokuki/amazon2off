@@ -2,6 +2,10 @@ server:
   port: 8080
   servlet:
     context-path: /amazon2off
+#  tomcat:
+#    accesslog:
+#      enabled: true
+#      directory: /logs
 
 spring:
   datasource:

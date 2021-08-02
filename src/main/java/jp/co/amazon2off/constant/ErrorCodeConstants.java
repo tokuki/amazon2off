@@ -79,4 +79,10 @@ public class ErrorCodeConstants {
     // 优惠码发布失败
     public static String C_0005 = "C_0005";
 
+    /**
+     * 商品类目相关ERROR CODE
+     */
+    // 商品类目失败
+    public static String S_0001 = "S_0001";
+
 }
