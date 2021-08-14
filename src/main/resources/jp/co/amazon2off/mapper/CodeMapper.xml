@@ -104,7 +104,7 @@
         WHERE
             t2.`status` = 1
             AND t1.listing_id IN
-        <foreach collection="listingPojo" item="item" index="index" separator="," open="(" close=");">
+        <foreach collection="listingPojo" item="item" index="index" separator="," open="(" close=")">
             #{item.id}
         </foreach>
         GROUP BY t1.listing_id,t1.start_time,t1.end_time

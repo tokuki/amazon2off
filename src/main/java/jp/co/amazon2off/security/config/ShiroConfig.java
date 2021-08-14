@@ -1,16 +1,12 @@
 package jp.co.amazon2off.security.config;
 
 import jp.co.amazon2off.security.realm.UserRealm;
-import net.sf.ehcache.CacheManager;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
-import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.SessionListener;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO;
-import org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
-import org.apache.shiro.session.mgt.eis.SessionIdGenerator;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -52,7 +48,7 @@ public class ShiroConfig {
         // 配置shiro的自定义认证逻辑
         defaultWebSecurityManager.setRealm(userRealm());
         // 配置shiro的自定义缓存
-        defaultWebSecurityManager.setCacheManager(ehCacheManager());
+//        defaultWebSecurityManager.setCacheManager(ehCacheManager());
         // 配置shiro的自定义session
         defaultWebSecurityManager.setSessionManager(sessionManager());
         return defaultWebSecurityManager;
@@ -63,15 +59,15 @@ public class ShiroConfig {
         UserRealm userRealm = new UserRealm();
         userRealm.setCredentialsMatcher(hashedCredentialsMatcher());
         /* 开启支持缓存，需要配置如下几个参数 */
-        userRealm.setCachingEnabled(true);
+//        userRealm.setCachingEnabled(true);
         // 启用身份验证缓存，即缓存AuthenticationInfo信息，默认false
-        userRealm.setAuthenticationCachingEnabled(true);
+//        userRealm.setAuthenticationCachingEnabled(true);
         // 缓存AuthenticationInfo信息的缓存名称 在ehcache.xml 中有对应缓存的配置
-        userRealm.setAuthenticationCacheName("authenticationCache");
+//        userRealm.setAuthenticationCacheName("authenticationCache");
         // 启用授权缓存，即缓存AuthorizationInfo信息，默认false
-        userRealm.setAuthorizationCachingEnabled(true);
+//        userRealm.setAuthorizationCachingEnabled(true);
         // 缓存AuthorizationInfo信息的缓存名称  在ehcache.xml 中有对应缓存的配置
-        userRealm.setAuthorizationCacheName("authorizationCache");
+//        userRealm.setAuthorizationCacheName("authorizationCache");
         return userRealm;
     }
 
@@ -91,10 +87,10 @@ public class ShiroConfig {
      *
      * @return
      */
-    @Bean
-    public SessionIdGenerator sessionIdGenerator() {
-        return new JavaUuidSessionIdGenerator();
-    }
+//    @Bean
+//    public SessionIdGenerator sessionIdGenerator() {
+//        return new JavaUuidSessionIdGenerator();
+//    }
 
     /**
      * SessionDAO的作用是为Session提供CRUD并进行持久化的一个shiro组件
@@ -107,11 +103,11 @@ public class ShiroConfig {
     public SessionDAO sessionDAO() {
         EnterpriseCacheSessionDAO enterpriseCacheSessionDAO = new EnterpriseCacheSessionDAO();
         //使用ehCacheManager
-        enterpriseCacheSessionDAO.setCacheManager(ehCacheManager());
+//        enterpriseCacheSessionDAO.setCacheManager(ehCacheManager());
         //设置session缓存的名字 默认为 shiro-activeSessionCache
         enterpriseCacheSessionDAO.setActiveSessionsCacheName("shiro-activeSessionCache");
         //sessionId生成器
-        enterpriseCacheSessionDAO.setSessionIdGenerator(sessionIdGenerator());
+        enterpriseCacheSessionDAO.setSessionIdGenerator(new SessionIdGeneratorConfig());
         return enterpriseCacheSessionDAO;
     }
 
@@ -120,17 +116,17 @@ public class ShiroConfig {
      *
      * @return
      */
-    @Bean
-    public EhCacheManager ehCacheManager() {
-        //注意myEhcache对应上面的<ehcache name="myEhcache">
-        CacheManager cacheManager = CacheManager.getCacheManager("myEhcache");
-        if (cacheManager == null) {
-            cacheManager = CacheManager.create();
-        }
-        EhCacheManager ehCacheManager = new EhCacheManager();
-        ehCacheManager.setCacheManager(cacheManager);
-        return ehCacheManager;
-    }
+//    @Bean
+//    public EhCacheManager ehCacheManager() {
+//        //注意myEhcache对应上面的<ehcache name="myEhcache">
+//        CacheManager cacheManager = CacheManager.getCacheManager("myEhcache");
+//        if (cacheManager == null) {
+//            cacheManager = CacheManager.create();
+//        }
+//        EhCacheManager ehCacheManager = new EhCacheManager();
+//        ehCacheManager.setCacheManager(cacheManager);
+//        return ehCacheManager;
+//    }
 
     /**
      * 配置保存sessionId的cookie
@@ -157,7 +153,7 @@ public class ShiroConfig {
         sessionManager.setSessionListeners(listeners);
         sessionManager.setSessionIdCookie(sessionIdCookie());
         sessionManager.setSessionDAO(sessionDAO());
-        sessionManager.setCacheManager(ehCacheManager());
+//        sessionManager.setCacheManager(ehCacheManager());
 
         // 全局会话超时时间（单位毫秒），默认30分钟
 //        sessionManager.setGlobalSessionTimeout(60 * 1000);

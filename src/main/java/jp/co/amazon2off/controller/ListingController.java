@@ -91,7 +91,7 @@ public class ListingController {
             @ApiImplicitParam(name = "endTime", value = "活动结束时间", required = true, paramType = "query", dataType = "Long")
     })
     @GetMapping("/getListingInfo")
-    public ResponseResult<List<ListingPojo>> getListingInfo(ListingPojo listingPojo) {
+    public ResponseResult<ListingPojo> getListingInfo(ListingPojo listingPojo) {
         try {
             return ResponseResult.success(listingService.getListingInfo(listingPojo));
         } catch (Exception e) {

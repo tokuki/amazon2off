@@ -105,6 +105,7 @@
             t1.asin,
             t1.title,
             t1.price,
+            t1.category,
             t2.discount_price      AS discountPrice,
             t2.discount_percentage AS discountPercentage,
             t1.explanation,
@@ -119,7 +120,8 @@
           AND t1.asin = #{listingPojo.asin}
           AND t1.id = #{listingPojo.id}
           AND t2.start_time = #{listingPojo.startTime}
-          AND t2.end_time = #{listingPojo.endTime};
+          AND t2.end_time = #{listingPojo.endTime}
+        LIMIT 1;
     </select>
 
     <select id="getListingListByCategory" parameterType="int" resultType="jp.co.amazon2off.pojo.ListingPojo">

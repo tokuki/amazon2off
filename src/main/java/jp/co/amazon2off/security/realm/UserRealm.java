@@ -5,6 +5,7 @@ import jp.co.amazon2off.service.RoleService;
 import jp.co.amazon2off.service.UserService;
 import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -109,6 +110,11 @@ public class UserRealm extends AuthorizingRealm {
     public void clearAllCache() {
         clearAllCachedAuthenticationInfo();
         clearAllCachedAuthorizationInfo();
+    }
+
+    public void clearNowCache() {
+        PrincipalCollection principals = SecurityUtils.getSubject().getPrincipals();
+        clearCache(principals);
     }
 
 }

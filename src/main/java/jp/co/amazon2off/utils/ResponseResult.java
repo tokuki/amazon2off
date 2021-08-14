@@ -24,8 +24,11 @@ public class ResponseResult<T> implements Serializable {
     public static final String SUCCESS = "success";
     public static final String ERROR = "error";
 
-    @JsonProperty("errno")
-    private String errorCode;
+    @JsonProperty("statusCode")
+    private int statusCode;
+
+    @JsonProperty("code")
+    private String code;
 
     @JsonProperty("errorMessage")
     private String errorMessage;
@@ -46,7 +49,8 @@ public class ResponseResult<T> implements Serializable {
      */
     public static ResponseResult success() {
         val result = new ResponseResult();
-        result.setErrorCode(SUCCESS);
+        result.setStatusCode(200);
+        result.setCode(SUCCESS);
         result.setDate(DateUtils.getCurrentTimeMillis());
         return result;
     }
@@ -60,7 +64,8 @@ public class ResponseResult<T> implements Serializable {
      */
     public static <T> ResponseResult success(T data) {
         val result = new ResponseResult<T>();
-        result.setErrorCode(SUCCESS);
+        result.setStatusCode(200);
+        result.setCode(SUCCESS);
         result.setDate(DateUtils.getCurrentTimeMillis());
         result.setData(data);
         return result;
@@ -76,6 +81,7 @@ public class ResponseResult<T> implements Serializable {
      */
     public static <T> ResponseResult success(T data, Map<String, Object> attachments) {
         val result = success(data);
+        result.setStatusCode(200);
         result.getAttachments().putAll(attachments);
         result.setDate(DateUtils.getCurrentTimeMillis());
         return result;
@@ -89,14 +95,15 @@ public class ResponseResult<T> implements Serializable {
      */
     public static ResponseResult error(@NotBlank String code) {
         val result = new ResponseResult();
-        result.setErrorCode(ERROR);
-        result.setErrorCode(code);
+        result.setStatusCode(100);
+        result.setCode(code);
         result.setDate(DateUtils.getCurrentTimeMillis());
         return result;
     }
 
     public static ResponseResult error(@NotBlank String code, Map<String, Object> attachments) {
         val result = error(code);
+        result.setStatusCode(100);
         result.getAttachments().putAll(attachments);
         result.setDate(DateUtils.getCurrentTimeMillis());
         return result;
@@ -104,7 +111,8 @@ public class ResponseResult<T> implements Serializable {
 
     public static <T> ResponseResult error(@NotBlank String code, T data) {
         val result = new ResponseResult<T>();
-        result.setErrorCode(ERROR);
+        result.setStatusCode(100);
+        result.setCode(code);
         result.setDate(DateUtils.getCurrentTimeMillis());
         result.setData(data);
         return result;

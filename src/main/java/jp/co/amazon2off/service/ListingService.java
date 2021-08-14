@@ -62,21 +62,21 @@ public class ListingService {
         // 主图处理
         map.putAll(uploadCoverImage(path, coverImageFile, 3, false));
         // 主图大图片路径
-        listingPojo.setCoverImage(map.get("imagePath"));
+        listingPojo.setCoverImage(map.get("coverImage"));
         // 主图小图片路径
-        listingPojo.setSmallCoverImage(map.get("smallImagePath"));
+        listingPojo.setSmallCoverImage(map.get("smallCoverImage"));
 
         // 副图处理
         if (secondaryImageFile != null && secondaryImageFile.length > 0) {
             map.putAll(uploadSecondaryImage(path, secondaryImageFile, 3, false));
-            listingPojo.setSecondaryImageA(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageA(map.get("smallImagePath"));
-            listingPojo.setSecondaryImageB(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageB(map.get("smallImagePath"));
-            listingPojo.setSecondaryImageC(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageC(map.get("smallImagePath"));
-            listingPojo.setSecondaryImageD(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageD(map.get("smallImagePath"));
+            listingPojo.setSecondaryImageA(map.get("secondaryImageA"));
+            listingPojo.setSmallSecondaryImageA(map.get("smallSecondaryImageA"));
+            listingPojo.setSecondaryImageB(map.get("secondaryImageB"));
+            listingPojo.setSmallSecondaryImageB(map.get("smallSecondaryImageB"));
+            listingPojo.setSecondaryImageC(map.get("secondaryImageC"));
+            listingPojo.setSmallSecondaryImageC(map.get("smallSecondaryImageC"));
+            listingPojo.setSecondaryImageD(map.get("secondaryImageD"));
+            listingPojo.setSmallSecondaryImageD(map.get("smallSecondaryImageD"));
         }
 
         listingPojo.setUserId(SecurityUtil.getCurrentUser().getId());
@@ -85,7 +85,6 @@ public class ListingService {
         List<String> codeList = FileUtils.readFileByInputStream(codeFile.getInputStream());
         // 优惠码相关
         CodePojo codePojo = new CodePojo();
-        codePojo.setListingId(listingPojo.getId());
         codePojo.setStartTime(startTime);
         codePojo.setEndTime(endTime);
         codePojo.setDiscountPrice(listingPojo.getDiscountPrice());
@@ -94,6 +93,7 @@ public class ListingService {
 
         // 添加商品
         listingMapper.addListing(listingPojo);
+        codePojo.setListingId(listingPojo.getId());
         // 添加优惠码
         codeMapper.addCode(codeList, codePojo);
         return map;
@@ -189,7 +189,7 @@ public class ListingService {
      * @param listingPojo
      * @return
      */
-    public List<ListingPojo> getListingInfo(ListingPojo listingPojo) throws Exception {
+    public ListingPojo getListingInfo(ListingPojo listingPojo) throws Exception {
         return listingMapper.getListingInfo(listingPojo);
     }
 
@@ -289,22 +289,22 @@ public class ListingService {
             // 主图处理
             map.putAll(uploadCoverImage(path, coverImageFile, 3, false));
             // 主图大图片路径
-            listingPojo.setCoverImage(map.get("imagePath"));
+            listingPojo.setCoverImage(map.get("coverImage"));
             // 主图小图片路径
-            listingPojo.setSmallCoverImage(map.get("smallImagePath"));
+            listingPojo.setSmallCoverImage(map.get("smallCoverImage"));
         }
 
         // 副图处理
         if (secondaryImageFile != null && secondaryImageFile.length > 0) {
             map.putAll(uploadSecondaryImage(path, secondaryImageFile, 3, false));
-            listingPojo.setSecondaryImageA(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageA(map.get("smallImagePath"));
-            listingPojo.setSecondaryImageB(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageB(map.get("smallImagePath"));
-            listingPojo.setSecondaryImageC(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageC(map.get("smallImagePath"));
-            listingPojo.setSecondaryImageD(map.get("imagePath"));
-            listingPojo.setSmallSecondaryImageD(map.get("smallImagePath"));
+            listingPojo.setSecondaryImageA(map.get("secondaryImageA"));
+            listingPojo.setSmallSecondaryImageA(map.get("smallSecondaryImageA"));
+            listingPojo.setSecondaryImageB(map.get("secondaryImageB"));
+            listingPojo.setSmallSecondaryImageB(map.get("smallSecondaryImageB"));
+            listingPojo.setSecondaryImageC(map.get("secondaryImageC"));
+            listingPojo.setSmallSecondaryImageC(map.get("smallSecondaryImageC"));
+            listingPojo.setSecondaryImageD(map.get("secondaryImageD"));
+            listingPojo.setSmallSecondaryImageD(map.get("smallSecondaryImageD"));
         }
 
         listingPojo.setUpdateTime(DateUtils.getCurrentTimeMillis());

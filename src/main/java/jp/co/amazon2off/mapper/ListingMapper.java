@@ -50,7 +50,7 @@ public interface ListingMapper {
      * @param listingPojo
      * @return
      */
-    List<ListingPojo> getListingInfo(@Param("listingPojo") ListingPojo listingPojo);
+    ListingPojo getListingInfo(@Param("listingPojo") ListingPojo listingPojo);
 
     /**
      * 根据品类获取商品列表

@@ -5,7 +5,10 @@ import jp.co.amazon2off.pojo.UserPojo;
 import jp.co.amazon2off.utils.DateUtils;
 import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -60,6 +63,7 @@ public class UserService {
         Md5Hash md5Hash = new Md5Hash(userPojo.getPassWord(), "", 1024);
         userPojo.setPassWordByMd5(md5Hash.toHex());
         userMapper.updateUserPaw(userPojo);
+        logout(SecurityUtils.getSubject());
     }
 
     /**
@@ -81,5 +85,30 @@ public class UserService {
         userPojo.setId(SecurityUtil.getCurrentUser().getId());
         userPojo.setUpdateTime(DateUtils.getCurrentTimeMillis());
         userMapper.updateUserInfo(userPojo);
+    }
+
+    /**
+     * 用户退出
+     *
+     * @param subject
+     * @throws Exception
+     */
+    public void logout(Subject subject) throws Exception {
+        subject.logout();
+//        if (!subject.isAuthenticated()) {
+//            DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+//            UserRealm shiroRealm = (UserRealm) securityManager.getRealms().iterator().next();
+//            shiroRealm.clearAllCache();
+//        }
+    }
+
+    /**
+     * 用户登陆
+     *
+     * @param subject
+     * @throws Exception
+     */
+    public void login(Subject subject, UserPojo userPojo) throws Exception {
+        subject.login(new UsernamePasswordToken(userPojo.getUserMail(), userPojo.getPassWord()));
     }
 }
