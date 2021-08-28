@@ -7,18 +7,26 @@ import io.swagger.annotations.ApiOperation;
 import jp.co.amazon2off.constant.ErrorCodeConstants;
 import jp.co.amazon2off.pojo.UserPojo;
 import jp.co.amazon2off.service.UserService;
+import jp.co.amazon2off.utils.JwtUtil;
+import jp.co.amazon2off.utils.RedisUtil;
 import jp.co.amazon2off.utils.ResponseResult;
 import jp.co.amazon2off.utils.ValidationUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 @Api
 @RestController
@@ -28,6 +36,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @ApiOperation(value = "用户注册")
     @ApiImplicitParams({
@@ -62,13 +72,27 @@ public class UserController {
     @PostMapping("/login")
     public ResponseResult login(UserPojo userPojo) {
         try {
-            Subject subject = SecurityUtils.getSubject();
-            userService.login(subject, userPojo);
-            if (subject.isAuthenticated()) {
-                log.info("用户邮箱：" + userPojo.getUserMail());
-                log.info("用户sessionId：" + subject.getSession().getId());
-                return ResponseResult.success(subject.getSession().getId());
+            UserPojo pojo = userService.selectUserByUserMail(userPojo.getUserMail());
+            if (pojo == null) {
+                return ResponseResult.error(ErrorCodeConstants.U_0004);
             }
+            if (!userPojo.getPassWord().equals(pojo.getPassWord())) {
+                return ResponseResult.error(ErrorCodeConstants.U_0005);
+            }
+            if (pojo.getStatus() == 0) {
+                return ResponseResult.error(ErrorCodeConstants.U_0007);
+            }
+            String token = JwtUtil.sign(userPojo.getUserMail(), userPojo.getPassWord());
+            redisUtil.setString(token, token);
+            Long time = JwtUtil.EXPIRE_TIME * 2;
+            redisUtil.expire(token, time);
+            Map<String, Object> map = new HashMap<>();
+            map.put("token", token);
+            map.put("timeout", time);
+            log.info("用户邮箱：" + userPojo.getUserMail());
+            log.info("token：" + token);
+            log.info("timeout:" + time);
+            return ResponseResult.success(map);
         } catch (UnknownAccountException e) {
             e.printStackTrace();
             return ResponseResult.error(ErrorCodeConstants.U_0004);
@@ -87,12 +111,13 @@ public class UserController {
     @ApiOperation(value = "退出登陆")
     @GetMapping("/logout")
     @RequiresPermissions(value = {"seller", "buyer"}, logical = Logical.OR)
-    public ResponseResult logout() {
+    public ResponseResult logout(ServletRequest request) {
         try {
-            log.info("sessionId：" + SecurityUtils.getSubject().getSession().getId());
-            Subject subject = SecurityUtils.getSubject();
-            userService.logout(subject);
-            if (!subject.isAuthenticated()) {
+            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            String token = httpServletRequest.getHeader("X_ACCESS_TOKEN");
+            log.info("执行退出登陆：" + token);
+            redisUtil.delete(token);
+            if (!redisUtil.hasKey(token)) {
                 return ResponseResult.success();
             }
         } catch (Exception e) {
@@ -122,13 +147,13 @@ public class UserController {
         return ResponseResult.error(ErrorCodeConstants.U_0009);
     }
 
-    @ApiOperation(value = "用户登陆状态")
-    @GetMapping("/loginState")
-    public ResponseResult loginState() {
-        log.info("sessionId：" + SecurityUtils.getSubject().getSession().getId());
-        Subject subject = SecurityUtils.getSubject();
-        return ResponseResult.success(subject.isAuthenticated());
-    }
+//    @ApiOperation(value = "用户登陆状态")
+//    @GetMapping("/loginState")
+//    public ResponseResult loginState() {
+//        log.info("sessionId：" + SecurityUtils.getSubject().getSession().getId());
+//        Subject subject = SecurityUtils.getSubject();
+//        return ResponseResult.success(subject.isAuthenticated());
+//    }
 
     @ApiOperation(value = "获取用户个人信息")
     @GetMapping("/getUserInfo")
@@ -149,6 +174,7 @@ public class UserController {
             @ApiImplicitParam(name = "intro", value = "个人介绍", required = false, paramType = "query", dataType = "String")
     })
     @PostMapping("/updateUserInfo")
+    @RequiresPermissions(value = {"seller", "buyer"}, logical = Logical.OR)
     public ResponseResult updateUserInfo(UserPojo userPojo) {
         try {
             userService.updateUserInfo(userPojo);

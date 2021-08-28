@@ -51,7 +51,7 @@ public class ResponseResult<T> implements Serializable {
         val result = new ResponseResult();
         result.setStatusCode(200);
         result.setCode(SUCCESS);
-        result.setDate(DateUtils.getCurrentTimeMillis());
+        result.setDate(DateUtil.getCurrentTimeMillis());
         return result;
     }
 
@@ -66,7 +66,7 @@ public class ResponseResult<T> implements Serializable {
         val result = new ResponseResult<T>();
         result.setStatusCode(200);
         result.setCode(SUCCESS);
-        result.setDate(DateUtils.getCurrentTimeMillis());
+        result.setDate(DateUtil.getCurrentTimeMillis());
         result.setData(data);
         return result;
     }
@@ -83,7 +83,7 @@ public class ResponseResult<T> implements Serializable {
         val result = success(data);
         result.setStatusCode(200);
         result.getAttachments().putAll(attachments);
-        result.setDate(DateUtils.getCurrentTimeMillis());
+        result.setDate(DateUtil.getCurrentTimeMillis());
         return result;
     }
 
@@ -97,7 +97,7 @@ public class ResponseResult<T> implements Serializable {
         val result = new ResponseResult();
         result.setStatusCode(100);
         result.setCode(code);
-        result.setDate(DateUtils.getCurrentTimeMillis());
+        result.setDate(DateUtil.getCurrentTimeMillis());
         return result;
     }
 
@@ -105,7 +105,7 @@ public class ResponseResult<T> implements Serializable {
         val result = error(code);
         result.setStatusCode(100);
         result.getAttachments().putAll(attachments);
-        result.setDate(DateUtils.getCurrentTimeMillis());
+        result.setDate(DateUtil.getCurrentTimeMillis());
         return result;
     }
 
@@ -113,7 +113,7 @@ public class ResponseResult<T> implements Serializable {
         val result = new ResponseResult<T>();
         result.setStatusCode(100);
         result.setCode(code);
-        result.setDate(DateUtils.getCurrentTimeMillis());
+        result.setDate(DateUtil.getCurrentTimeMillis());
         result.setData(data);
         return result;
     }

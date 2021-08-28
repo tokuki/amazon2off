@@ -31,6 +31,10 @@ spring:
       max-request-size: 10MB
   aop:
     proxy-target-class: true
+  redis:
+    host: 35.76.43.135
+    port: 6379
+    password: tooff.
 
 logging:
   level:

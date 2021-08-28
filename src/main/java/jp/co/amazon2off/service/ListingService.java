@@ -4,7 +4,7 @@ import jp.co.amazon2off.mapper.CodeMapper;
 import jp.co.amazon2off.mapper.ListingMapper;
 import jp.co.amazon2off.pojo.CodePojo;
 import jp.co.amazon2off.pojo.ListingPojo;
-import jp.co.amazon2off.utils.DateUtils;
+import jp.co.amazon2off.utils.DateUtil;
 import jp.co.amazon2off.utils.FileUtils;
 import jp.co.amazon2off.utils.ImageUtils;
 import jp.co.amazon2off.utils.SecurityUtil;
@@ -80,7 +80,7 @@ public class ListingService {
         }
 
         listingPojo.setUserId(SecurityUtil.getCurrentUser().getId());
-        listingPojo.setAddTime(DateUtils.getCurrentTimeMillis());
+        listingPojo.setAddTime(DateUtil.getCurrentTimeMillis());
         // 优惠码处理
         List<String> codeList = FileUtils.readFileByInputStream(codeFile.getInputStream());
         // 优惠码相关
@@ -89,7 +89,7 @@ public class ListingService {
         codePojo.setEndTime(endTime);
         codePojo.setDiscountPrice(listingPojo.getDiscountPrice());
         codePojo.setDiscountPercentage(Double.valueOf(String.format("%.2f", listingPojo.getDiscountPrice() / listingPojo.getPrice() * 100)));
-        codePojo.setAddTime(DateUtils.getCurrentTimeMillis());
+        codePojo.setAddTime(DateUtil.getCurrentTimeMillis());
 
         // 添加商品
         listingMapper.addListing(listingPojo);
@@ -165,7 +165,7 @@ public class ListingService {
         }
         // 近期要开始活动的商品（2天）
         if (listingPojo.getType() == 4) {
-            listingIdList = codeMapper.getListingIdByTime(System.currentTimeMillis(), DateUtils.getBeforeTwoDay()[0], DateUtils.getBeforeTwoDay()[1]);
+            listingIdList = codeMapper.getListingIdByTime(System.currentTimeMillis(), DateUtil.getBeforeTwoDay()[0], DateUtil.getBeforeTwoDay()[1]);
         }
         // 优惠码被领取最多的商品
         if (listingPojo.getType() == 5) {
@@ -235,7 +235,7 @@ public class ListingService {
      * @return
      */
     private List<ListingPojo> listingInfoFormat(List<CodePojo> codeList, List<ListingPojo> listingList) {
-        Long nowTime = DateUtils.getCurrentTimeMillis();
+        Long nowTime = DateUtil.getCurrentTimeMillis();
         Map<Integer, List<CodePojo>> listMap = codeList.stream().collect(Collectors.groupingBy(CodePojo::getListingId));
         for (ListingPojo listingPojo : listingList) {
             Long dValue = null;
@@ -307,7 +307,7 @@ public class ListingService {
             listingPojo.setSmallSecondaryImageD(map.get("smallSecondaryImageD"));
         }
 
-        listingPojo.setUpdateTime(DateUtils.getCurrentTimeMillis());
+        listingPojo.setUpdateTime(DateUtil.getCurrentTimeMillis());
         listingMapper.updateListingInfo(listingPojo);
         if (listingPojo.getPrice() != null) {
             listingPojo.setDiscountPercentage(Double.valueOf(String.format("%.2f", listingPojo.getDiscountPrice() / listingPojo.getPrice() * 100)));

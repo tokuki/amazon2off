@@ -3,7 +3,7 @@ package jp.co.amazon2off.service;
 import jp.co.amazon2off.constant.ErrorCodeConstants;
 import jp.co.amazon2off.mapper.CodeMapper;
 import jp.co.amazon2off.pojo.CodePojo;
-import jp.co.amazon2off.utils.DateUtils;
+import jp.co.amazon2off.utils.DateUtil;
 import jp.co.amazon2off.utils.FileUtils;
 import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class CodeService {
         CodePojo codePojo = new CodePojo();
         codePojo.setListingId(listingId);
         codePojo.setUserId(SecurityUtil.getCurrentUser().getId());
-        codePojo.setReceiveTime(DateUtils.getCurrentTimeMillis());
+        codePojo.setReceiveTime(DateUtil.getCurrentTimeMillis());
         if (codeMapper.codeNumByListingId(codePojo) > 0) {
             throw new Exception(ErrorCodeConstants.C_0002);
         }

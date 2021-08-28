@@ -1,28 +1,45 @@
 package jp.co.amazon2off.security.realm;
 
+import jp.co.amazon2off.constant.ErrorCodeConstants;
 import jp.co.amazon2off.pojo.UserPojo;
+import jp.co.amazon2off.security.config.JwtToken;
 import jp.co.amazon2off.service.RoleService;
 import jp.co.amazon2off.service.UserService;
+import jp.co.amazon2off.utils.JwtUtil;
+import jp.co.amazon2off.utils.RedisUtil;
 import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+
+import javax.annotation.Resource;
 
 /**
  * 自定义账户Realm
  */
 @Slf4j
+@Configuration
 public class UserRealm extends AuthorizingRealm {
 
     @Autowired
     private UserService userService;
     @Autowired
     private RoleService roleService;
+    @Lazy
+    @Resource
+    private RedisUtil redisUtil;
+
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof JwtToken;
+    }
 
     /**
      * 授权
@@ -43,14 +60,19 @@ public class UserRealm extends AuthorizingRealm {
     /**
      * 认证
      *
-     * @param token
+     * @param authToken
      * @return
      * @throws AuthenticationException
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authToken) throws AuthenticationException {
         log.info("--------------开始身份认证--------------");
-        String userMail = (String) token.getPrincipal();
+        String token = (String) authToken.getPrincipal();
+        if (StringUtils.isEmpty(token)) {
+            throw new AuthenticationException(ErrorCodeConstants.U_0015);
+        }
+
+        String userMail = JwtUtil.getUserMail(token);
         UserPojo userPojo = userService.selectUserByUserMail(userMail);
         if (userPojo == null) {
             throw new UnknownAccountException();
@@ -58,63 +80,44 @@ public class UserRealm extends AuthorizingRealm {
         if (userPojo.getStatus() == 0) {
             throw new DisabledAccountException();
         }
+        if (!jwtTokenRefresh(token, userPojo.getUserMail(), userPojo.getPassWord())) {
+            throw new AuthenticationException(ErrorCodeConstants.U_0013);
+        }
         log.info("--------------结束身份认证--------------");
-        return new SimpleAuthenticationInfo(userPojo, userPojo.getPassWord(), getName());
+        return new SimpleAuthenticationInfo(userPojo, token, getName());
     }
 
     /**
-     * 重写方法,清除当前用户的的 授权缓存
+     * JWTToken刷新生命周期 （实现： 用户在线操作不掉线功能）
      *
-     * @param principal
+     * @param userName
+     * @param passWord
+     * @return
      */
-    @Override
-    public void clearCachedAuthorizationInfo(PrincipalCollection principal) {
-        super.clearCachedAuthorizationInfo(principal);
+    public boolean jwtTokenRefresh(String token, String userName, String passWord) {
+        String cacheToken = redisUtil.get(token);
+        if (StringUtils.isNotEmpty(cacheToken)) {
+            // 校验token有效性
+            if (!JwtUtil.verify(cacheToken, userName, passWord)) {
+                String newAuthorization = JwtUtil.sign(userName, passWord);
+                // 设置超时时间
+                redisUtil.setString(token, newAuthorization);
+                redisUtil.expire(token, JwtUtil.EXPIRE_TIME * 2);
+            }
+        } else {
+            return false;
+        }
+        return true;
     }
 
     /**
-     * 重写方法，清除当前用户的 认证缓存
+     * 清除当前用户的权限认证缓存
      *
-     * @param principal
-     */
-    @Override
-    public void clearCachedAuthenticationInfo(PrincipalCollection principal) {
-        super.clearCachedAuthenticationInfo(principal);
-    }
-
-    /**
-     * 重写方法，清除当前用户的 认证缓存和授权缓存
+     * @param principals 权限信息
      */
     @Override
     public void clearCache(PrincipalCollection principals) {
         super.clearCache(principals);
-    }
-
-    /**
-     * 自定义方法：清除所有用户的 授权缓存
-     */
-    public void clearAllCachedAuthorizationInfo() {
-        getAuthorizationCache().clear();
-    }
-
-    /**
-     * 自定义方法：清除所有用户的 认证缓存
-     */
-    public void clearAllCachedAuthenticationInfo() {
-        getAuthenticationCache().clear();
-    }
-
-    /**
-     * 自定义方法：清除所有用户的  认证缓存  和 授权缓存
-     */
-    public void clearAllCache() {
-        clearAllCachedAuthenticationInfo();
-        clearAllCachedAuthorizationInfo();
-    }
-
-    public void clearNowCache() {
-        PrincipalCollection principals = SecurityUtils.getSubject().getPrincipals();
-        clearCache(principals);
     }
 
 }

@@ -2,7 +2,7 @@ package jp.co.amazon2off.service;
 
 import jp.co.amazon2off.mapper.UserMapper;
 import jp.co.amazon2off.pojo.UserPojo;
-import jp.co.amazon2off.utils.DateUtils;
+import jp.co.amazon2off.utils.DateUtil;
 import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -46,7 +46,7 @@ public class UserService {
         // 注册密码
         userPojo.setPassWordByMd5(md5Hash.toHex());
         // 注册时间
-        userPojo.setRegisterTime(DateUtils.getCurrentTimeMillis());
+        userPojo.setRegisterTime(DateUtil.getCurrentTimeMillis());
         // 用户角色
         userPojo.setRoleId(userPojo.getRoleId());
         // 保存用户信息
@@ -72,6 +72,7 @@ public class UserService {
      * @return
      */
     public UserPojo getUserInfo() throws Exception {
+        log.info(SecurityUtil.getCurrentUser().getId().toString());
         return userMapper.getUserInfo(SecurityUtil.getCurrentUser().getId());
     }
 
@@ -83,7 +84,7 @@ public class UserService {
      */
     public void updateUserInfo(UserPojo userPojo) throws Exception {
         userPojo.setId(SecurityUtil.getCurrentUser().getId());
-        userPojo.setUpdateTime(DateUtils.getCurrentTimeMillis());
+        userPojo.setUpdateTime(DateUtil.getCurrentTimeMillis());
         userMapper.updateUserInfo(userPojo);
     }
 

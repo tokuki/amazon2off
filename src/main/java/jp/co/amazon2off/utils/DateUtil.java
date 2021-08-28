@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * 时间工具类
  */
-public class DateUtils {
+public class DateUtil {
 
     /**
      * 获取当前系统时间(时间戳)
@@ -194,9 +194,9 @@ public class DateUtils {
         GregorianCalendar calendar = new GregorianCalendar();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         if (hour < 10) {
-            return DateUtils.getCurrentTime() + " 0" + hour;
+            return DateUtil.getCurrentTime() + " 0" + hour;
         }
-        return DateUtils.getDateByString() + " " + hour;
+        return DateUtil.getDateByString() + " " + hour;
     }
 
     /**
@@ -210,12 +210,12 @@ public class DateUtils {
         if (hour > 0) {
             hour = calendar.get(Calendar.HOUR_OF_DAY) - 1;
             if (hour < 10) {
-                return DateUtils.getDateByString() + " 0" + hour;
+                return DateUtil.getDateByString() + " 0" + hour;
             }
-            return DateUtils.getDateByString() + " " + hour;
+            return DateUtil.getDateByString() + " " + hour;
         }
         //获取当前日期前一天
-        return DateUtils.getBeforeDay() + " " + 23;
+        return DateUtil.getBeforeDay() + " " + 23;
     }
 
     /**
