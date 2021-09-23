@@ -56,6 +56,13 @@ public class ShiroConfig {
         linkedHashMap.put("/api/listing/getPopularListing", "anon");
         linkedHashMap.put("/api/Categorys/getCategorys", "anon");
         linkedHashMap.put("/filterError/*", "anon");
+        //swagger配置放行
+        linkedHashMap.put("/swagger-ui.html", "anon");
+        linkedHashMap.put("/swagger/**", "anon");
+        linkedHashMap.put("/webjars/**", "anon");
+        linkedHashMap.put("/swagger-resources/**", "anon");
+        linkedHashMap.put("/v3/**", "anon");
+        linkedHashMap.put("/swagger-ui/**", "anon");
         // 拦截请求
         linkedHashMap.put("/**", "authc");
         // 配置拦截链到过滤器工厂
