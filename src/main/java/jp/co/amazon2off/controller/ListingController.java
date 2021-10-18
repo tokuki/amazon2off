@@ -1,5 +1,6 @@
 package jp.co.amazon2off.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -70,13 +71,15 @@ public class ListingController {
     @ApiOperation(value = "商品模糊查询")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "keyWords", value = "搜索关键词", required = false, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "type", value = "0-无作用，1-Free，2-50%以下优惠的商品，3-50%以上优惠的商品（不包括100%），4-近期要开始活动的商品，5-优惠码被领取最多的商品",
-                    required = true, paramType = "query", dataType = "int")
+            @ApiImplicitParam(name = "type", value = "0-无作用，1-Free，2-50%以下优惠的商品，3-50%以上优惠的商品（不包括100%），4-近期要开始活动的商品，5-优惠码被领取最多的商品", required = true, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "currentPage", value = "页码", required = false, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "limit", value = "每页个数", required = false, paramType = "query", dataType = "int")
     })
     @GetMapping("/getListingList")
     public ResponseResult<List<ListingPojo>> getListingList(ListingPojo listingPojo) {
         try {
-            return ResponseResult.success(listingService.getListingList(listingPojo));
+            Page<ListingPojo> page = new Page<>(listingPojo.getCurrentPage(), listingPojo.getLimit());
+            return ResponseResult.success(listingService.getListingList(page, listingPojo));
         } catch (Exception e) {
             e.printStackTrace();
         }

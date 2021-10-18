@@ -34,7 +34,7 @@ public class ErrorCodeConstants {
     public static String U_0012 = "U_0012";
     // token失效，重新登陆
     public static String U_0013 = "U_0013";
-    // 未知错误
+    // 注册邮件发送失败
     public static String U_0014 = "U_0014";
     // 未找到token，请登录
     public static String U_0015 = "U_0015";

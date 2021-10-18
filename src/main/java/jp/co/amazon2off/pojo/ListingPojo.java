@@ -1,5 +1,6 @@
 package jp.co.amazon2off.pojo;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jp.co.amazon2off.entity.Listing;
 import lombok.AllArgsConstructor;
 import lombok.Data;

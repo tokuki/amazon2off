@@ -1,5 +1,7 @@
 package jp.co.amazon2off.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jp.co.amazon2off.pojo.ListingPojo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -26,7 +28,7 @@ public interface ListingMapper {
      * @param keyWords
      * @return
      */
-    List<ListingPojo> getListByKeyWords(@Param("keyWords") String keyWords);
+    IPage<ListingPojo> getListByKeyWords(Page<ListingPojo> page, @Param("keyWords") String keyWords);
 
     /**
      * 根据商品ID查找商品
@@ -34,7 +36,7 @@ public interface ListingMapper {
      * @param listingIds
      * @return
      */
-    List<ListingPojo> getListByListingId(@Param("listingIds") List<Integer> listingIds);
+    IPage<ListingPojo> getListByListingId(Page<ListingPojo> page, @Param("listingIds") List<Integer> listingIds);
 
     /**
      * 根据优惠力度查询商品
@@ -42,7 +44,7 @@ public interface ListingMapper {
      * @param listingPojo
      * @return
      */
-    List<ListingPojo> getListByDiscount(@Param("listingPojo") ListingPojo listingPojo);
+    IPage<ListingPojo> getListByDiscount(Page<ListingPojo> page, @Param("listingPojo") ListingPojo listingPojo);
 
     /**
      * 商品相亲查询

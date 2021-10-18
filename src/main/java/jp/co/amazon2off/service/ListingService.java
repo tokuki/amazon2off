@@ -1,5 +1,7 @@
 package jp.co.amazon2off.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jp.co.amazon2off.mapper.CodeMapper;
 import jp.co.amazon2off.mapper.ListingMapper;
 import jp.co.amazon2off.pojo.CodePojo;
@@ -58,7 +60,7 @@ public class ListingService {
         Map<String, String> map = new HashMap<>();
         // 存储路径
         String path = System.getProperty("java.io.tmpdir") + uploadDir;
-        log.info(">>>>>>>路径>>>>>>>>>>>>>:"+path);
+        log.info(">>>>>>>路径>>>>>>>>>>>>>:" + path);
         // 主图处理
         map.putAll(uploadCoverImage(path, coverImageFile, 3, false));
         // 主图大图片路径
@@ -135,31 +137,23 @@ public class ListingService {
      * @return
      * @throws Exception
      */
-    public List<ListingPojo> getListingList(ListingPojo listingPojo) throws Exception {
+    public IPage<ListingPojo> getListingList(Page<ListingPojo> page, ListingPojo listingPojo) throws Exception {
         List<Integer> listingIdList = new ArrayList<>();
         if (listingPojo.getType() == 0) {
-            List<ListingPojo> list = listingMapper.getListByKeyWords(listingPojo.getKeyWords());
-            if (list != null && !list.isEmpty()) {
-                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+            IPage<ListingPojo> list = listingMapper.getListByKeyWords(page, listingPojo.getKeyWords());
+            if (list.getRecords() != null && !list.getRecords().isEmpty()) {
+                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list.getRecords());
                 if (codePojo != null && !codePojo.isEmpty()) {
-                    return listingInfoFormat(codePojo, list);
+                    return list.setRecords(listingInfoFormat(codePojo, list.getRecords()));
                 }
             }
         }
         if (listingPojo.getType() == 1 || listingPojo.getType() == 2 || listingPojo.getType() == 3) {
-            List<ListingPojo> list = listingMapper.getListByDiscount(listingPojo);
-            if (list != null && !list.isEmpty()) {
-                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+            IPage<ListingPojo> list = listingMapper.getListByDiscount(page, listingPojo);
+            if (list.getRecords() != null && !list.getRecords().isEmpty()) {
+                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list.getRecords());
                 if (codePojo != null && !codePojo.isEmpty()) {
-                    if (listingPojo.getType() == 1) {
-                        return listingInfoFormat(codePojo, list).stream().filter(i -> i.getDiscountPercentage() == 100.00).collect(Collectors.toList());
-                    }
-                    if (listingPojo.getType() == 2) {
-                        return listingInfoFormat(codePojo, list).stream().filter(i -> i.getDiscountPercentage() < 50.00).collect(Collectors.toList());
-                    }
-                    if (listingPojo.getType() == 3) {
-                        return listingInfoFormat(codePojo, list).stream().filter(i -> i.getDiscountPercentage() >= 50.00 && i.getDiscountPercentage() < 100.00).collect(Collectors.toList());
-                    }
+                    return list.setRecords(listingInfoFormat(codePojo, list.getRecords()));
                 }
             }
         }
@@ -172,15 +166,15 @@ public class ListingService {
             listingIdList = codeMapper.getListingIdByCode();
         }
         if (listingIdList != null && !listingIdList.isEmpty()) {
-            List<ListingPojo> list = listingMapper.getListByListingId(listingIdList);
-            if (list != null && !list.isEmpty()) {
-                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list);
+            IPage<ListingPojo> list = listingMapper.getListByListingId(page, listingIdList);
+            if (list.getRecords() != null && !list.getRecords().isEmpty()) {
+                List<CodePojo> codePojo = codeMapper.getTimeByListingId(list.getRecords());
                 if (codePojo != null && !codePojo.isEmpty()) {
-                    return listingInfoFormat(codePojo, list);
+                    return list.setRecords(listingInfoFormat(codePojo, list.getRecords()));
                 }
             }
         }
-        return new ArrayList<>();
+        return new Page<>();
     }
 
     /**
@@ -231,13 +225,13 @@ public class ListingService {
      * 组装商品活动时间
      *
      * @param codeList
-     * @param listingList
+     * @param list
      * @return
      */
-    private List<ListingPojo> listingInfoFormat(List<CodePojo> codeList, List<ListingPojo> listingList) {
+    private List<ListingPojo> listingInfoFormat(List<CodePojo> codeList, List<ListingPojo> list) {
         Long nowTime = DateUtil.getCurrentTimeMillis();
         Map<Integer, List<CodePojo>> listMap = codeList.stream().collect(Collectors.groupingBy(CodePojo::getListingId));
-        for (ListingPojo listingPojo : listingList) {
+        for (ListingPojo listingPojo : list) {
             Long dValue = null;
             for (CodePojo codePojo : listMap.get(listingPojo.getId())) {
                 Long dis = nowTime - codePojo.getStartTime();
@@ -258,7 +252,7 @@ public class ListingService {
                 }
             }
         }
-        return listingList;
+        return list;
     }
 
     /**
@@ -284,7 +278,7 @@ public class ListingService {
         Map<String, String> map = new HashMap<>();
         // 存储路径
         String path = System.getProperty("java.io.tmpdir") + uploadDir;
-        log.info(">>>>>>>路径>>>>>>>>>>>>>:"+path);
+        log.info(">>>>>>>路径>>>>>>>>>>>>>:" + path);
         if (coverImageFile != null && !coverImageFile.isEmpty()) {
             // 主图处理
             map.putAll(uploadCoverImage(path, coverImageFile, 3, false));

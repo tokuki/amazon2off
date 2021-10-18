@@ -185,4 +185,12 @@ public class UserController {
         return ResponseResult.error(ErrorCodeConstants.U_0012);
     }
 
+    @ApiOperation(value = "发送注册邮件")
+    @ApiImplicitParam(name = "mail", value = "注册邮箱", required = true, paramType = "query", dataType = "String")
+    @PostMapping("/sendMail")
+    public ResponseResult sendMail(String mail) {
+
+        return ResponseResult.error(ErrorCodeConstants.U_0014);
+    }
+
 }

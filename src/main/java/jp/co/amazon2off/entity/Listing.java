@@ -1,5 +1,6 @@
 package jp.co.amazon2off.entity;
 
+import jp.co.amazon2off.base.BasePojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Listing {
+public class Listing extends BasePojo {
     /**
      * ID
      */

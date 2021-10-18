@@ -1,5 +1,6 @@
 package jp.co.amazon2off.utils;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -81,9 +82,18 @@ public class ResponseResult<T> implements Serializable {
      */
     public static <T> ResponseResult success(T data, Map<String, Object> attachments) {
         val result = success(data);
-        result.setStatusCode(200);
         result.getAttachments().putAll(attachments);
-        result.setDate(DateUtil.getCurrentTimeMillis());
+        return result;
+    }
+
+    public static <T> ResponseResult success(IPage<?> page) {
+        val result = success(page.getRecords());
+        Map<String, Object> map = new HashMap<>();
+        map.put("total", page.getTotal());
+        map.put("limit", page.getSize());
+        map.put("offset", page.getCurrent());
+        map.put("totalPage", page.getPages());
+        result.getAttachments().putAll(map);
         return result;
     }
 
