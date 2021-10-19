@@ -18,6 +18,11 @@ public class Constants {
     public static String KEY_REGISTER_CODE = "REGISTER_CODE_ZC";
 
     /**
+     * 改密key
+     */
+    public static String KEY_PASSWORD_CHANGE_CODE = "PASSWORD_CODE_GM";
+
+    /**
      * 邮件API_USER
      */
     public static String API_USER = "2off";
@@ -33,7 +38,12 @@ public class Constants {
     public static String FROM_MAIL = "2off@2off.jp";
 
     /**
-     * 邮件标题
+     * 邮件注册验证标题
      */
-    public static String SUBJECT = "注册验证码";
+    public static String ZC_SUBJECT = "注册验证码";
+
+    /**
+     * 邮件改密验证标题
+     */
+    public static String GM_SUBJECT = "密码修改验证码";
 }

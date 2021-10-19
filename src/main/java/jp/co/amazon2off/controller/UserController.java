@@ -58,7 +58,7 @@ public class UserController {
             }
 
             String ciphertext = SignUtil.encrypt(userPojo.getUserMail(), Constants.KEY_REGISTER_CODE);
-            log.info("验证码key>>>>>>>>>>>>>>>>>>>>>>:" + ciphertext);
+            log.info("注册验证码key>>>>>>>>>>>>>>>>>>>>>>:" + ciphertext);
             String code = redisUtil.get(ciphertext);
             if (StringUtils.isBlank(code)) {
                 return ResponseResult.error(ErrorCodeConstants.U_0016);
@@ -140,15 +140,29 @@ public class UserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userMail", value = "用户邮箱", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "passWord", value = "用户密码", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "passWordAgain", value = "再次输入用户密码", required = true, paramType = "query", dataType = "String")
+            @ApiImplicitParam(name = "passWordAgain", value = "再次输入用户密码", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "code", value = "注册验证码", required = true, paramType = "query", dataType = "String")
     })
     @PostMapping("/updateUserPaw")
     @RequiresPermissions(value = {"seller", "buyer"}, logical = Logical.OR)
     public ResponseResult updateUserPaw(UserPojo userPojo) {
+        if (!ValidationUtil.passWordOfValidation(userPojo.getPassWord())) {
+            return ResponseResult.error(ErrorCodeConstants.U_0003);
+        }
+
+        String ciphertext = SignUtil.encrypt(userPojo.getUserMail(), Constants.KEY_PASSWORD_CHANGE_CODE);
+        log.info("改密验证码key>>>>>>>>>>>>>>>>>>>>>>:" + ciphertext);
+        String code = redisUtil.get(ciphertext);
+        if (StringUtils.isBlank(code)) {
+            return ResponseResult.error(ErrorCodeConstants.U_0016);
+        }
+        if (StringUtils.isNotBlank(code) && !code.equals(userPojo.getCode())) {
+            return ResponseResult.error(ErrorCodeConstants.U_0017);
+        }
+        if (!userPojo.getPassWord().equals(userPojo.getPassWordAgain())) {
+            return ResponseResult.error(ErrorCodeConstants.U_0010);
+        }
         try {
-            if (!userPojo.getPassWord().equals(userPojo.getPassWordAgain())) {
-                return ResponseResult.error(ErrorCodeConstants.U_0010);
-            }
             userService.updateUserPaw(userPojo);
             return ResponseResult.success();
         } catch (Exception e) {
@@ -196,14 +210,17 @@ public class UserController {
     }
 
     @ApiOperation(value = "发送注册邮件")
-    @ApiImplicitParam(name = "mail", value = "注册邮箱", required = true, paramType = "query", dataType = "String")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "mail", value = "注册邮箱", required = true, paramType = "query", dataType = "String"),
+            @ApiImplicitParam(name = "type", value = "邮件类型:1-注册验证，2-修改密码验证", required = true, paramType = "query", dataType = "int")
+    })
     @PostMapping("/sendMail")
-    public ResponseResult sendMail(String mail) {
+    public ResponseResult sendMail(String mail, Integer type) {
         try {
             if (!ValidationUtil.mailOfValidation(mail)) {
                 return ResponseResult.error(ErrorCodeConstants.U_0002);
             }
-            userService.sendMail(mail);
+            userService.sendMail(mail, type);
             return ResponseResult.success();
         } catch (Exception e) {
             e.printStackTrace();

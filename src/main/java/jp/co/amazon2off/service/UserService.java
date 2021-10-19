@@ -137,32 +137,38 @@ public class UserService {
      *
      * @param mail
      */
-    public void sendMail(String mail) throws Exception {
+    public void sendMail(String mail, Integer type) throws Exception {
         StringBuffer code = new StringBuffer();
         for (int i = 0; i < 6; i++) {
             code.append(new Random().nextInt(9));
         }
-
+        String ciphertext = null;
         Map<String, Object> params = new HashMap<>();
         params.put("apiUser", Constants.API_USER);
         params.put("apiKey", Constants.API_KEY);
         params.put("from", Constants.FROM_MAIL);
         params.put("to", mail);
-        params.put("subject", Constants.SUBJECT);
+        if (type == 1) {
+            params.put("subject", Constants.ZC_SUBJECT);
+            ciphertext = SignUtil.encrypt(mail, Constants.KEY_REGISTER_CODE);
+        }
+        if (type == 2) {
+            params.put("subject", Constants.GM_SUBJECT);
+            ciphertext = SignUtil.encrypt(mail, Constants.KEY_PASSWORD_CHANGE_CODE);
+        }
         params.put("html", code.toString());
 
         String json = HttpClientUtil.httpPostRequest(Constants.SEND_MAIL_URL, params);
 
         Map<String, Object> map = FastJsonUtil.stringToMap(json);
         if ("200".equals(map.get("statusCode").toString())) {
-            String ciphertext = SignUtil.encrypt(mail, Constants.KEY_REGISTER_CODE);
 
             redisUtil.setString(ciphertext, code.toString(), 300);
 
             SendMailLogPojo sendMailLogPojo = new SendMailLogPojo();
             sendMailLogPojo.setMail(mail);
             sendMailLogPojo.setCode(code.toString());
-            sendMailLogPojo.setType(1);
+            sendMailLogPojo.setType(type);
             sendMailLogPojo.setAddTime(DateUtil.getCurrentTimeMillis());
 
             userMapper.saveSendMailLog(sendMailLogPojo);
