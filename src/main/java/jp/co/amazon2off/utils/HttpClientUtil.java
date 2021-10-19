@@ -46,7 +46,7 @@ public class HttpClientUtil {
      */
     public static CloseableHttpClient getHttpClient() {
         init();
-        return HttpClients.custom().setConnectionManager(cm).build();
+        return HttpClients.custom().setConnectionManager(cm).setConnectionManagerShared(true).build();
     }
 
     /**
