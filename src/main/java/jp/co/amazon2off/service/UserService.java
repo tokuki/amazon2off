@@ -1,10 +1,13 @@
 package jp.co.amazon2off.service;
 
+import com.alibaba.fastjson.JSONObject;
+import jp.co.amazon2off.constant.Constants;
 import jp.co.amazon2off.mapper.UserMapper;
+import jp.co.amazon2off.pojo.SendMailLogPojo;
 import jp.co.amazon2off.pojo.UserPojo;
-import jp.co.amazon2off.utils.DateUtil;
-import jp.co.amazon2off.utils.SecurityUtil;
+import jp.co.amazon2off.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -34,6 +40,8 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 根据用户邮箱查询用户信息
@@ -129,54 +137,35 @@ public class UserService {
      *
      * @param mail
      */
-    public void sendMail(String mail) {
-        // 获得Http客户端(可以理解为:你得先有一个浏览器;注意:实际上HttpClient与浏览器是不一样的)
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-
-        // 参数
-        StringBuilder params = new StringBuilder();
-        try {
-            // 字符数据最好encoding以下;这样一来，某些特殊字符才能传过去(如:某人的名字就是“&”,不encoding的话,传不过去)
-            params.append("phone=").append(URLEncoder.encode("admin", "utf-8"));
-            params.append("&");
-            params.append("password=admin");
-        } catch (UnsupportedEncodingException e1) {
-            e1.printStackTrace();
+    public void sendMail(String mail) throws Exception {
+        StringBuffer code = new StringBuffer();
+        for (int i = 0; i < 6; i++) {
+            code.append(new Random().nextInt(9));
         }
 
-        // 创建Post请求
-        HttpPost httpPost = new HttpPost("http://localhost:12345/index.html/" + "?" + params);
+        Map<String, Object> params = new HashMap<>();
+        params.put("apiUser", Constants.API_USER);
+        params.put("apiKey", Constants.API_KEY);
+        params.put("from", Constants.FROM_MAIL);
+        params.put("to", mail);
+        params.put("subject", Constants.SUBJECT);
+        params.put("html", code.toString());
 
-        // 设置ContentType(注:如果只是传普通参数的话,ContentType不一定非要用application/json)
-        httpPost.setHeader("Content-Type", "application/json;charset=utf8");
+        String json = HttpClientUtil.httpPostRequest(Constants.SEND_MAIL_URL, params);
 
-        // 响应模型
-        CloseableHttpResponse response = null;
-        try {
-            // 由客户端执行(发送)Post请求
-            response = httpClient.execute(httpPost);
-            // 从响应模型中获取响应实体
-            HttpEntity responseEntity = response.getEntity();
+        Map<String, Object> map = FastJsonUtil.stringToMap(json);
+        if ("200".equals(map.get("statusCode").toString())) {
+            String ciphertext = SignUtil.encrypt(mail, Constants.KEY_REGISTER_CODE);
 
-            System.out.println("响应状态为:" + response.getStatusLine());
-            if (responseEntity != null) {
-                System.out.println("响应内容长度为:" + responseEntity.getContentLength());
-                System.out.println("响应内容为:" + EntityUtils.toString(responseEntity));
-            }
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // 释放资源
-                if (httpClient != null) {
-                    httpClient.close();
-                }
-                if (response != null) {
-                    response.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            redisUtil.setString(ciphertext, code.toString(), 300);
+
+            SendMailLogPojo sendMailLogPojo = new SendMailLogPojo();
+            sendMailLogPojo.setMail(mail);
+            sendMailLogPojo.setCode(code.toString());
+            sendMailLogPojo.setType(1);
+            sendMailLogPojo.setAddTime(DateUtil.getCurrentTimeMillis());
+
+            userMapper.saveSendMailLog(sendMailLogPojo);
         }
     }
 }

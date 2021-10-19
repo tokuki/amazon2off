@@ -1,5 +1,6 @@
 package jp.co.amazon2off.mapper;
 
+import jp.co.amazon2off.pojo.SendMailLogPojo;
 import jp.co.amazon2off.pojo.UserPojo;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
@@ -46,4 +47,9 @@ public interface UserMapper {
      * @param userPojo
      */
     void updateUserInfo(@Param("userPojo") UserPojo userPojo);
+
+    /**
+     * 保存邮件发送记录
+     */
+    void saveSendMailLog(@Param("sendMailLogPojo") SendMailLogPojo sendMailLogPojo);
 }

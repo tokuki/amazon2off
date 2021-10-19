@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * 验证工具类
  */
-public class ValidationUtils implements Serializable {
+public class ValidationUtil implements Serializable {
 
     /**
      * 邮箱格式验证

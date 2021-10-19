@@ -38,6 +38,10 @@ public class ErrorCodeConstants {
     public static String U_0014 = "U_0014";
     // 未找到token，请登录
     public static String U_0015 = "U_0015";
+    // 验证码已过期
+    public static String U_0016 = "U_0016";
+    // 验证码有误
+    public static String U_0017 = "U_0017";
 
     /**
      * 商品相关ERROR CODE

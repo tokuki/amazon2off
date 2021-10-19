@@ -4,14 +4,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import jp.co.amazon2off.constant.Constants;
 import jp.co.amazon2off.constant.ErrorCodeConstants;
 import jp.co.amazon2off.pojo.UserPojo;
 import jp.co.amazon2off.service.UserService;
-import jp.co.amazon2off.utils.JwtUtil;
-import jp.co.amazon2off.utils.RedisUtil;
-import jp.co.amazon2off.utils.ResponseResult;
-import jp.co.amazon2off.utils.ValidationUtils;
+import jp.co.amazon2off.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
@@ -45,16 +44,27 @@ public class UserController {
             @ApiImplicitParam(name = "userMail", value = "用户邮箱", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "passWord", value = "用户密码", required = true, paramType = "query", dataType = "String"),
             @ApiImplicitParam(name = "passWordAgain", value = "再次用户密码", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "roleId", value = "用户角色", required = true, paramType = "query", dataType = "int")
+            @ApiImplicitParam(name = "roleId", value = "用户角色", required = true, paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "code", value = "注册验证码", required = true, paramType = "query", dataType = "String")
     })
     @PostMapping("/register")
     public ResponseResult register(UserPojo userPojo) {
         try {
-            if (!ValidationUtils.mailOfValidation(userPojo.getUserMail())) {
+            if (!ValidationUtil.mailOfValidation(userPojo.getUserMail())) {
                 return ResponseResult.error(ErrorCodeConstants.U_0002);
             }
-            if (!ValidationUtils.passWordOfValidation(userPojo.getPassWord())) {
+            if (!ValidationUtil.passWordOfValidation(userPojo.getPassWord())) {
                 return ResponseResult.error(ErrorCodeConstants.U_0003);
+            }
+
+            String ciphertext = SignUtil.encrypt(userPojo.getUserMail(), Constants.KEY_REGISTER_CODE);
+            log.info("验证码key>>>>>>>>>>>>>>>>>>>>>>:" + ciphertext);
+            String code = redisUtil.get(ciphertext);
+            if (StringUtils.isBlank(code)) {
+                return ResponseResult.error(ErrorCodeConstants.U_0016);
+            }
+            if (StringUtils.isNotBlank(code) && !code.equals(userPojo.getCode())) {
+                return ResponseResult.error(ErrorCodeConstants.U_0017);
             }
             userService.saveUser(userPojo);
             return ResponseResult.success();
@@ -189,7 +199,15 @@ public class UserController {
     @ApiImplicitParam(name = "mail", value = "注册邮箱", required = true, paramType = "query", dataType = "String")
     @PostMapping("/sendMail")
     public ResponseResult sendMail(String mail) {
-
+        try {
+            if (!ValidationUtil.mailOfValidation(mail)) {
+                return ResponseResult.error(ErrorCodeConstants.U_0002);
+            }
+            userService.sendMail(mail);
+            return ResponseResult.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return ResponseResult.error(ErrorCodeConstants.U_0014);
     }
 

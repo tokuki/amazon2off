@@ -52,4 +52,9 @@
         WHERE id = #{userPojo.id}
     </update>
 
+    <insert id="saveSendMailLog">
+        INSERT INTO send_mail_log (mail, code, type, add_time)
+        VALUES (#{sendMailLogPojo.mail}, #{sendMailLogPojo.code}, #{sendMailLogPojo.type}, #{sendMailLogPojo.addTime});
+    </insert>
+
 </mapper>

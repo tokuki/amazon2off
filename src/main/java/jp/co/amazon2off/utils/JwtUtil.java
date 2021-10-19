@@ -5,8 +5,12 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import jp.co.amazon2off.constant.Constants;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JwtUtil {
     // Token过期时间一天（用户登录过期时间是此时间的两倍，以token在reids缓存时间为准）
@@ -59,6 +63,5 @@ public class JwtUtil {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         // 附带username信息
         return JWT.create().withClaim("userMail", userMail).withExpiresAt(date).sign(algorithm);
-
     }
 }

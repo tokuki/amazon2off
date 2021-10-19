@@ -49,6 +49,7 @@ public class ShiroConfig {
         // 放行请求
         linkedHashMap.put("/api/user/login", "anon");
         linkedHashMap.put("/api/user/register", "anon");
+        linkedHashMap.put("/api/user/sendMail", "anon");
         linkedHashMap.put("/api/listing/downloadImage", "anon");
         linkedHashMap.put("/api/listing/getListingList", "anon");
         linkedHashMap.put("/api/listing/getListingInfo", "anon");

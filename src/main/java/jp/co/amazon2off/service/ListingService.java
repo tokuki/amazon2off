@@ -8,7 +8,7 @@ import jp.co.amazon2off.pojo.CodePojo;
 import jp.co.amazon2off.pojo.ListingPojo;
 import jp.co.amazon2off.utils.DateUtil;
 import jp.co.amazon2off.utils.FileUtils;
-import jp.co.amazon2off.utils.ImageUtils;
+import jp.co.amazon2off.utils.ImageUtil;
 import jp.co.amazon2off.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
@@ -351,7 +351,7 @@ public class ListingService {
     private Map<String, String> uploadCoverImage(String path, MultipartFile coverImageFile, int scale, boolean flag) throws Exception {
         Map<String, String> map = new HashMap<>();
         // 主图上传
-        Map<String, String> coverMap = ImageUtils.uploadImage(coverImageFile, path, scale, flag);
+        Map<String, String> coverMap = ImageUtil.uploadImage(coverImageFile, path, scale, flag);
         // 设置主图片回显路径
         map.put("coverImage", coverMap.get("imagePath"));
         map.put("smallCoverImage", coverMap.get("smallImagePath"));
@@ -371,7 +371,7 @@ public class ListingService {
     private Map<String, String> uploadSecondaryImage(String path, MultipartFile[] secondaryImageFile, int scale, boolean flag) throws Exception {
         Map<String, String> map = new HashMap<>();
         for (int i = 0; i < secondaryImageFile.length; i++) {
-            Map<String, String> secondaryMap = ImageUtils.uploadImage(secondaryImageFile[i], path, 3, false);
+            Map<String, String> secondaryMap = ImageUtil.uploadImage(secondaryImageFile[i], path, 3, false);
             switch (i) {
                 case 0:
                     map.put("secondaryImageA", secondaryMap.get("imagePath"));
