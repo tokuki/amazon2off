@@ -217,6 +217,9 @@ public class UserController {
     @PostMapping("/sendMail")
     public ResponseResult sendMail(String mail, Integer type) {
         try {
+            ValidationUtil.chkEmptyException("注册邮箱", mail);
+            ValidationUtil.chkEmptyException("邮件类型", type);
+
             if (!ValidationUtil.mailOfValidation(mail)) {
                 return ResponseResult.error(ErrorCodeConstants.U_0002);
             }

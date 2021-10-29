@@ -49,4 +49,17 @@ public class ValidationUtil implements Serializable {
         return false;
     }
 
+    /**
+     * 空验证
+     */
+    public static void chkEmptyException(String colName, Object colValue) {
+        if (isNull(colValue)) {
+            throw new RuntimeException(colName + "不能为空！");
+        }
+    }
+
+    private static boolean isNull(Object obj) {
+        return obj == null || "".equals(obj.toString());
+    }
+
 }
