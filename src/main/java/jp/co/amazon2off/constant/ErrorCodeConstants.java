@@ -42,6 +42,10 @@ public class ErrorCodeConstants {
     public static String U_0016 = "U_0016";
     // 验证码有误
     public static String U_0017 = "U_0017";
+    // 两次密码不一致
+    public static String U_0018 = "U_0018";
+    // 邮箱已被注册
+    public static String U_0019 = "U_0019";
 
     /**
      * 商品相关ERROR CODE

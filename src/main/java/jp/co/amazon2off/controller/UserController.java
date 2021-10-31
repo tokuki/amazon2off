@@ -56,6 +56,14 @@ public class UserController {
             if (!ValidationUtil.passWordOfValidation(userPojo.getPassWord())) {
                 return ResponseResult.error(ErrorCodeConstants.U_0003);
             }
+            if (!userPojo.getPassWord().equals(userPojo.getPassWordAgain())) {
+                return ResponseResult.error(ErrorCodeConstants.U_0018);
+            }
+
+            UserPojo user = userService.selectUserByUserMail(userPojo.getUserMail());
+            if (user != null) {
+                return ResponseResult.error(ErrorCodeConstants.U_0019);
+            }
 
             String ciphertext = SignUtil.encrypt(userPojo.getUserMail(), Constants.KEY_REGISTER_CODE);
             log.info("注册验证码key>>>>>>>>>>>>>>>>>>>>>>:" + ciphertext);
