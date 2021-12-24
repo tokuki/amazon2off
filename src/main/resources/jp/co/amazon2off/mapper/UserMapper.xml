@@ -35,7 +35,8 @@
             avatar,
             gender,
             birthday,
-            intro
+            intro,
+            role_id AS roleId
         FROM
             `user`
         WHERE
